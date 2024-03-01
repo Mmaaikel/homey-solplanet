@@ -1,0 +1,88 @@
+<style type="text/css">
+	.homey-solarpanels-form {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
+	
+	.homey-solarpanels-submit-button {
+		margin-top: auto;
+	}
+	
+	.homey-solarpanels-help {
+		display: flex;
+		align-items: center;
+		
+		color: var(--homey-color-text-light);
+	}
+	
+	.homey-solarpanels-help > svg {
+		width: 1.25em;
+		height: 1.25em;
+		
+		fill: var(--homey-color-text-light);
+		
+		margin-right: 0.5em;
+	}
+</style>
+
+<form class="homey-form homey-solarpanels-form" onsubmit="onConnect(event)">
+	<h1 class="homey-title">Please enter your details</h1>
+	
+	<div class="homey-form-group">
+		<label class="homey-form-label" for="ip_address">Inverter IP address</label>
+		<input
+			class="homey-form-input"
+			type="text"
+			id="ip_address"
+			placeholder="192.168.1.20"
+			value=""
+		/>
+		
+		<label class="homey-form-label" for="device_nr">Device number</label>
+		<input
+			class="homey-form-input"
+			type="text"
+			id="device_nr"
+			placeholder="2"
+			value="2"
+		/>
+		
+		<label class="homey-form-label" for="device_serial_number">Device serial number (can be found on your inverter)</label>
+		<input
+			class="homey-form-input"
+			type="text"
+			id="device_serial_number"
+			placeholder=""
+			value=""
+		/>
+	</div>
+	
+	<button
+		class="homey-button-primary-full homey-solarpanels-submit-button"
+		type="submit"
+	>
+		Connect
+	</button>
+</form>
+
+<script type="application/javascript">
+	const onConnect = async (event) => {
+		event.preventDefault(); // Prevent the form from submitting and refreshing the page
+		
+		Homey.showLoadingOverlay();
+		
+		const ipAddress = document.getElementById("ip_address").value;
+		const deviceNr = document.getElementById("device_nr").value;
+		const deviceSerialNr = document.getElementById("device_serial_number").value;
+		
+		Homey.emit("validate", { ipAddress, deviceNr, deviceSerialNr })
+		     .then(() => {
+			     Homey.showView("list_devices");
+		     })
+		     .catch((error) => {
+			     Homey.hideLoadingOverlay();
+			     Homey.alert(error.message);
+		     });
+	};
+</script>

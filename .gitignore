@@ -1,0 +1,6 @@
+/env.json
+/node_modules/
+/.homeybuild/
+.idea/
+package-lock.json
+.DS_Store

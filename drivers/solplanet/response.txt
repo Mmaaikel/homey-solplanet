@@ -1,0 +1,19 @@
+json_attributes:
+flg # ???
+tim # date/time
+tmp # inverter temperature / 10
+fac # frequency / 100
+pac # actual power watt
+sac # apparent power
+qac # reactive power
+eto # total produced / 10
+etd # total produced daily / 10
+hto # running time
+pf # ???
+wan # ???
+err # errors
+vac # voltage / 10
+iac # current / 10
+vpv # string voltage
+ipv # string current
+str
