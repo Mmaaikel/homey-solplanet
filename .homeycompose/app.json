@@ -1,6 +1,6 @@
 {
   "id": "nl.mmaaikel.solplanet",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "compatibility": ">=5.0.0",
   "sdk": 3,
   "platforms": [
@@ -10,7 +10,7 @@
     "en": "SolPlanet"
   },
   "description": {
-    "en": "Adds support for SolPlanet devices."
+    "en": "You can depend on the sun and Solplanet"
   },
   "category": "energy",
   "permissions": [],
