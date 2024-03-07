@@ -21,6 +21,7 @@ export default class SolPlanetApi {
 			referrerPolicy: 'no-referrer'
 		})
 		
+		// Hard error. Throw directly
 		if( !response.ok ) {
 			throw new Error(
 				"An unknown error occurred while fetching inverter data."
@@ -30,9 +31,36 @@ export default class SolPlanetApi {
 		return response.json();
 	}
 	
+	isValid( responseJson ) {
+		// Tim is the time of the inverter, when not set or empty the returned data is not correct
+		if( !responseJson?.tim || responseJson.tim === '' ) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	async validate() {
+		// Get data and check if we error?
+		try {
+			const data = await this.getData();
+			
+			return this.isValid( data );
+		} catch ( err ) {
+			return false;
+		}
+	}
+	
 	async getSystemName() {
 		// Get data and check if we error?
 		const data = await this.getData();
+		
+		// Check if the data is valid
+		if( this.isValid( data ) === false ) {
+			throw new Error(
+				`Could not fetch the correct data. Check the settings.`
+			);
+		}
 		
 		return 'Solplanet Inverter'
 	}

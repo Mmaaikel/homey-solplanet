@@ -26,26 +26,27 @@ class SolPlanetDriver extends Driver {
 			const devicesList = [];
 			
 			try {
-			if( this.ipAddress && this.deviceNr && this.deviceSerialNr ) {
-				const systemName = await new SolPlanetApi( this.ipAddress, this.deviceNr, this.deviceSerialNr ).getSystemName();
-				
-				devicesList.push({
-					name: systemName,
-					data: {
-						sid: this.systemId,
-					},
-					settings: {
-						ip_address: this.ipAddress,
-						device_nr: this.deviceNr,
-						device_serial_number: this.deviceSerialNr,
-					},
-				});
-			}
+				if( this.ipAddress && this.deviceNr && this.deviceSerialNr ) {
+					const api = await new SolPlanetApi( this.ipAddress, this.deviceNr, this.deviceSerialNr );
+					
+					// Get the system name
+					const systemName = await api.getSystemName();
+					
+					devicesList.push({
+						name: systemName,
+						data: {
+							sid: this.systemId,
+						},
+						settings: {
+							ip_address: this.ipAddress,
+							device_nr: this.deviceNr,
+							device_serial_number: this.deviceSerialNr,
+						},
+					});
+				}
 			} catch (err) {
 				this.homey.log("Error listing devices: ", err );
 			}
-			
-			this.homey.log( devicesList )
 			
 			return devicesList;
 		});
