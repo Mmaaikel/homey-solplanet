@@ -5,7 +5,34 @@ export default class SolPlanetApi {
 	apiUrl;
 	
 	constructor( ip_address, device_nr, device_serial_number ) {
+		
+		// remove http and / from the ip address
+		ip_address = this.cleanIpAddress( ip_address );
+		
+		// trim the device number
+		device_nr = this.cleanValue( device_nr );
+		
+		// Trim the device serial number
+		device_serial_number = this.cleanValue( device_serial_number );
+		
 		this.apiUrl = `http://${ ip_address }:8484/getdevdata.cgi?device=${ device_nr }&sn=${ device_serial_number }`
+	}
+	
+	cleanIpAddress( ip_address ) {
+		// remove http and / from the ip address
+		ip_address = ip_address.replace(/(^\w+:|^)\/\//, '');
+		
+		// Remove the trailing slash
+		ip_address = ip_address.replace(/\/$/, '');
+		
+		// Trim the ip address
+		ip_address = ip_address.replace(/\s/g, '').trim();
+		
+		return ip_address;
+	}
+	
+	cleanValue( value ) {
+		return value.replace(/\s/g, '').trim();
 	}
 	
 	async getData() {
