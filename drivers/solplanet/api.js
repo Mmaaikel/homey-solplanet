@@ -38,14 +38,14 @@ export default class SolPlanetApi {
 	async getData() {
 		const response = await fetch( this.apiUrl, {
 			method: 'GET',
-			mode: 'cors',
+			//mode: 'cors',
 			cache: 'no-cache',
-			credentials: 'same-origin',
+			//credentials: 'same-origin',
+			redirect: 'follow',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			redirect: 'follow',
-			referrerPolicy: 'no-referrer'
+			//referrerPolicy: 'no-referrer'
 		})
 		
 		// Hard error. Throw directly
@@ -55,7 +55,13 @@ export default class SolPlanetApi {
 			);
 		}
 		
-		return response.json();
+		try {
+			return await response.json();
+		} catch ( err ) {
+			throw new Error(
+				"Your settings are incorrect. Could not fetch the correct data."
+			);
+		}
 	}
 	
 	isValid( responseJson ) {

@@ -8,10 +8,15 @@ class SolPlanet extends Inverter {
 	api;
 	
 	async onInit() {
+		this.homey.log('SolPlanet has been initialized')
+		
 		const settings = this.getSettings();
+		this.homey.log( 'Settings:', settings )
 		
 		// Init the API
 		this.api = new SolPlanetApi( settings.ip_address, settings.device_nr, settings.device_serial_number );
+		this.homey.log('Api created', this.api.apiUrl )
+		
 		this.interval = settings.interval ?? 60;
 		
 		super.onInit();
