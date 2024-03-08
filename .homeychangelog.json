@@ -16,5 +16,8 @@
   },
   "1.0.5": {
     "en": "Added setting value clean"
+  },
+  "1.0.6": {
+    "en": "Small fixes and more logging"
   }
 }
