@@ -19,5 +19,8 @@
   },
   "1.0.6": {
     "en": "Small fixes and more logging"
+  },
+  "1.0.7": {
+    "en": "Paring process updated, fetch in the night updated"
   }
 }
