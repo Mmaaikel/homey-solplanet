@@ -4,6 +4,7 @@ import SolPlanetApi from "./api";
 
 class SolPlanet extends Inverter {
 	
+	checksFailed = 0;
 	interval = 60;
 	api;
 	
@@ -54,6 +55,9 @@ class SolPlanet extends Inverter {
 				
 				// Check the data
 				if( this.api.isValid( productionData ) ) {
+					// Reset the checks failed
+					this.checksFailed = 0;
+					
 					// Temperature
 					const currentTemperature = productionData.tmp / 10;
 					await this.setCapabilityValue( "measure_temperature", currentTemperature );
@@ -81,8 +85,28 @@ class SolPlanet extends Inverter {
 				
 				await this.setCapabilityValue( "measure_power", 0 );
 				
-				this.homey.log(`Unavailable: ${errorMessage}`);
-				//await this.setUnavailable(errorMessage);
+				// Update the fail checks
+				this.checksFailed++;
+				this.homey.log(`Unavailable (${this.checksFailed}): ${errorMessage}`);
+				
+				// Check if it is later than midnight
+				const now = new Date();
+				const midnight = new Date();
+				midnight.setHours(0,0,0,0);
+				
+				// And before 3 AM
+				const threeAm = new Date();
+				threeAm.setHours(3,0,0,0);
+				
+				if( now > midnight && now < threeAm ) {
+					// Update the daily production
+					await this.setCapabilityValue( "meter_power", 0 );
+				}
+				
+				if( this.checksFailed > 3 ) {
+					// Change the interval to 5 minutes
+					this.resetInterval( 5 * 60 );
+				}
 			}
 		} else if ( !this.api ) {
 			await this.setUnavailable(

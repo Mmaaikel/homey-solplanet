@@ -80,7 +80,13 @@
 		const deviceSerialNr = document.getElementById("device_serial_number").value;
 		
 		Homey.emit( "validate", { ipAddress, deviceNr, deviceSerialNr })
-		     .then(() => {
+		     .then(( result ) => {
+				 if( result.error ) {
+					 Homey.hideLoadingOverlay();
+					 Homey.alert( result.error );
+					 return;
+				 }
+				 
 			     Homey.showView("list_devices");
 		     })
 		     .catch((error) => {

@@ -45,8 +45,8 @@
 		},
 		"measure_power": {
 			"title": {
-				"en": "Power (production)",
-				"nl": "Vermogen (productie)"
+				"en": "Power (huidig)",
+				"nl": "Vermogen (huidig)"
 			}
 		},
 		"meter_power": {

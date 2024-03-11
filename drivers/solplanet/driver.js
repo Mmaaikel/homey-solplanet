@@ -19,7 +19,16 @@ class SolPlanetDriver extends Driver {
 			this.deviceNr = deviceNr ?? '';
 			this.deviceSerialNr = deviceSerialNr ?? '';
 			
-			return new SolPlanetApi( this.ipAddress, this.deviceNr, this.deviceSerialNr ).getSystemName();
+			const api = new SolPlanetApi( this.ipAddress, this.deviceNr, this.deviceSerialNr );
+			
+			const systemName = await api.getSystemName();
+			if( systemName === null ) {
+				return {
+					error: "Could not fetch the correct data. Check the settings."
+				}
+			}
+			
+			return systemName;
 		});
 		
 		session.setHandler("list_devices", async () => {
@@ -35,19 +44,21 @@ class SolPlanetDriver extends Driver {
 					const sid = randomUUID();
 					const systemName = await api.getSystemName();
 					
-					this.homey.log('System name:', systemName );
+					this.homey.log('System name: ', systemName, sid );
 					
-					devicesList.push({
-						name: systemName,
-						data: {
-							sid: sid,
-						},
-						settings: {
-							ip_address: this.ipAddress,
-							device_nr: this.deviceNr,
-							device_serial_number: this.deviceSerialNr,
-						},
-					});
+					if( systemName !== null ) {
+						devicesList.push({
+							name: systemName,
+							data: {
+								sid: sid,
+							},
+							settings: {
+								ip_address: this.ipAddress,
+								device_nr: this.deviceNr,
+								device_serial_number: this.deviceSerialNr,
+							},
+						});
+					}
 				}
 			} catch (err) {
 				this.homey.log("Error listing devices: ", err );

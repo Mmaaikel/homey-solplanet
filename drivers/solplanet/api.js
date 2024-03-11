@@ -38,33 +38,30 @@ export default class SolPlanetApi {
 	async getData() {
 		const response = await fetch( this.apiUrl, {
 			method: 'GET',
-			//mode: 'cors',
 			cache: 'no-cache',
-			//credentials: 'same-origin',
 			redirect: 'follow',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			//referrerPolicy: 'no-referrer'
 		})
 		
 		// Hard error. Throw directly
 		if( !response.ok ) {
-			throw new Error(
-				"An unknown error occurred while fetching inverter data."
-			);
+			return null;
 		}
 		
 		try {
 			return await response.json();
-		} catch ( err ) {
-			throw new Error(
-				"Your settings are incorrect. Could not fetch the correct data."
-			);
-		}
+		} catch ( err ) {}
+		
+		return null;
 	}
 	
 	isValid( responseJson ) {
+		if( responseJson === null ) {
+			return false;
+		}
+		
 		// Tim is the time of the inverter, when not set or empty the returned data is not correct
 		if( !responseJson?.tim || responseJson.tim === '' ) {
 			return false;
@@ -86,13 +83,17 @@ export default class SolPlanetApi {
 	
 	async getSystemName() {
 		// Get data and check if we error?
-		const data = await this.getData();
+		let data = null;
+		
+		try {
+			data = await this.getData();
+		} catch ( e ) {
+			return null;
+		}
 		
 		// Check if the data is valid
 		if( this.isValid( data ) === false ) {
-			throw new Error(
-				`Could not fetch the correct data. Check the settings.`
-			);
+			return null;
 		}
 		
 		return 'Solplanet Inverter'
