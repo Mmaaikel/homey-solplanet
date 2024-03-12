@@ -18,9 +18,16 @@ class SolPlanet extends Inverter {
 		this.api = new SolPlanetApi( settings.ip_address, settings.device_nr, settings.device_serial_number );
 		this.homey.log('Api created', this.api.apiUrl )
 		
-		this.interval = settings.interval ?? 60;
+		this.setDefaultInterval()
 		
 		super.onInit();
+	}
+	
+	setDefaultInterval() {
+		const settings = this.getSettings();
+		
+		this.interval = settings.interval ?? 60;
+		this.resetInterval( this.interval );
 	}
 	
 	async onSettings({ newSettings, changedKeys}) {
@@ -55,8 +62,12 @@ class SolPlanet extends Inverter {
 				
 				// Check the data
 				if( this.api.isValid( productionData ) ) {
+					
 					// Reset the checks failed
-					this.checksFailed = 0;
+					if( this.checksFailed > 0 ) {
+						this.checksFailed = 0;
+						this.setDefaultInterval()
+					}
 					
 					// Temperature
 					const currentTemperature = productionData.tmp / 10;
