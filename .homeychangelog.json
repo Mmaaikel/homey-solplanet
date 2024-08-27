@@ -25,5 +25,8 @@
   },
   "1.0.8": {
     "en": "Fix for refresh interval"
+  },
+  "1.0.9": {
+    "en": "Fix for the 'device not found' error"
   }
 }
