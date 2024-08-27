@@ -94,6 +94,13 @@ class SolPlanet extends Inverter {
 			} catch (err) {
 				const errorMessage = err.message;
 				
+				// If the error message contains the words 'not found' we have to stop the interval
+				// This means the device is not there anymore and we should not do anything...
+				if( errorMessage.toLowerCase().includes('not found') ) {
+					this.stopInterval()
+					return;
+				}
+				
 				await this.setCapabilityValue( "measure_power", 0 );
 				
 				// Update the fail checks

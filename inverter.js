@@ -1,4 +1,5 @@
 import { Device } from 'homey'
+import { clearInterval } from 'node:timers'
 
 export class Inverter extends Device {
 	
@@ -16,6 +17,10 @@ export class Inverter extends Device {
 	resetInterval( newInterval ) {
 		this.homey.clearInterval( this.currentInterval );
 		this.setInterval( newInterval );
+	}
+	
+	stopInterval() {
+		this.homey.clearInterval( this.currentInterval )
 	}
 	
 	async onInit() {
