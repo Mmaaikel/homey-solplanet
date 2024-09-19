@@ -28,5 +28,8 @@
   },
   "1.0.9": {
     "en": "Fix for the 'device not found' error"
+  },
+  "1.0.10": {
+    "en": "Added a validation to the current production power"
   }
 }
