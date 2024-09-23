@@ -31,5 +31,8 @@
   },
   "1.0.10": {
     "en": "Added a validation to the current production power"
+  },
+  "1.0.11": {
+    "en": "Updated value parsing"
   }
 }
