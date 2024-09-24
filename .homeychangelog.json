@@ -34,5 +34,8 @@
   },
   "1.0.11": {
     "en": "Updated value parsing"
+  },
+  "1.0.12": {
+    "en": "Added more validations to the received data"
   }
 }
