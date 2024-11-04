@@ -63,7 +63,11 @@ export default class SolPlanetApi {
 		}
 		
 		// Tim is the time of the inverter, when not set or empty the returned data is not correct
-		if( !responseJson?.tim || responseJson.tim === '' ) {
+		if( !responseJson?.tim || responseJson.tim === '' || responseJson.tim === '19700101000011' ) {
+			return false;
+		}
+		
+		if( !responseJson?.pac || responseJson.pac === 0 ) {
 			return false;
 		}
 		

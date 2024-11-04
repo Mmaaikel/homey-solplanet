@@ -1,6 +1,7 @@
 import { Inverter } from "../../inverter";
 
 import SolPlanetApi from "./api";
+import _ from 'lodash'
 
 class SolPlanet extends Inverter {
 	
@@ -70,24 +71,37 @@ class SolPlanet extends Inverter {
 					}
 					
 					// Temperature
-					const currentTemperature = productionData.tmp / 10;
-					await this.setCapabilityValue( "measure_temperature", currentTemperature );
+					const currentTemperature = Number( _.parseInt( productionData.tmp ) / 10 );
 					this.homey.log( `Current inverter temperature is ${ currentTemperature }` );
 					
+					if( currentTemperature !== undefined ) {
+						await this.setCapabilityValue( "measure_temperature", currentTemperature );
+					}
+					
 					// Current (w)
-					const currentProductionPower = productionData.pac;
-					await this.setCapabilityValue( "measure_power", currentProductionPower );
+					const currentProductionPower = Number( _.parseInt( productionData.pac ) );
 					this.homey.log( `Current production power is ${ currentProductionPower }W` );
 					
+					// Ignore when the current production power is more than 20k?
+					if( currentProductionPower !== undefined && currentProductionPower <= 20000 ) {
+						await this.setCapabilityValue( "measure_power", currentProductionPower );
+					}
+					
 					// Daily (kWh)
-					const dailyProductionEnergy = productionData.etd / 10;
-					await this.setCapabilityValue( "meter_power", dailyProductionEnergy );
+					const dailyProductionEnergy = Number( _.parseInt( productionData.etd ) / 10 );
 					this.homey.log( `Daily production energy is ${ dailyProductionEnergy }kWh` );
 					
+					if( dailyProductionEnergy !== undefined ) {
+						await this.setCapabilityValue( "meter_power", dailyProductionEnergy );
+					}
+					
 					// Total (kWh)
-					const totalProductionEnergy = productionData.eto / 10;
-					await this.setCapabilityValue( "meter_power.total", totalProductionEnergy );
+					const totalProductionEnergy = Number( _.parseInt( productionData.eto ) / 10 );
 					this.homey.log( `Total production energy is ${ totalProductionEnergy }kWh` );
+					
+					if( totalProductionEnergy !== undefined ) {
+						await this.setCapabilityValue( "meter_power.total", totalProductionEnergy );
+					}
 					
 					await this.setAvailable();
 				}
