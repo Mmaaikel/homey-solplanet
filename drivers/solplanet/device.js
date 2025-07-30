@@ -57,6 +57,13 @@ class SolPlanet extends Inverter {
 	async checkProduction() {
 		this.homey.log("Checking production");
 		
+		// Check if the device is available
+		if( this.getAvailable() === false ) {
+			this.homey.log("Device is not available. Stop the interval");
+			this.stopInterval()
+			return
+		}
+		
 		if( this.api ) {
 			try {
 				const productionData = await this.api.getData();
@@ -75,7 +82,7 @@ class SolPlanet extends Inverter {
 					this.homey.log( `Current inverter temperature is ${ currentTemperature }` );
 					
 					if( currentTemperature !== undefined ) {
-						await this.setCapabilityValue( "measure_temperature", currentTemperature );
+						this.setCapabilityValue( "measure_temperature", currentTemperature ).catch( this.onError.bind( this ) );
 					}
 					
 					// Current (w)
@@ -84,7 +91,7 @@ class SolPlanet extends Inverter {
 					
 					// Ignore when the current production power is more than 20k?
 					if( currentProductionPower !== undefined && currentProductionPower <= 20000 ) {
-						await this.setCapabilityValue( "measure_power", currentProductionPower );
+						this.setCapabilityValue( "measure_power", currentProductionPower ).catch( this.onError.bind( this ) );
 					}
 					
 					// Daily (kWh)
@@ -92,7 +99,7 @@ class SolPlanet extends Inverter {
 					this.homey.log( `Daily production energy is ${ dailyProductionEnergy }kWh` );
 					
 					if( dailyProductionEnergy !== undefined ) {
-						await this.setCapabilityValue( "meter_power", dailyProductionEnergy );
+						this.setCapabilityValue( "meter_power", dailyProductionEnergy ).catch( this.onError.bind( this ) );
 					}
 					
 					// Total (kWh)
@@ -100,26 +107,14 @@ class SolPlanet extends Inverter {
 					this.homey.log( `Total production energy is ${ totalProductionEnergy }kWh` );
 					
 					if( totalProductionEnergy !== undefined ) {
-						await this.setCapabilityValue( "meter_power.total", totalProductionEnergy );
+						this.setCapabilityValue( "meter_power.total", totalProductionEnergy ).catch( this.onError.bind( this ) );
 					}
 					
-					await this.setAvailable();
+					this.setAvailable().catch( this.onError.bind( this ) );
 				}
 			} catch (err) {
-				const errorMessage = err.message;
-				
-				// If the error message contains the words 'not found' we have to stop the interval
-				// This means the device is not there anymore and we should not do anything...
-				if( errorMessage.toLowerCase().includes('not found') ) {
-					this.stopInterval()
-					return;
-				}
-				
-				await this.setCapabilityValue( "measure_power", 0 );
-				
-				// Update the fail checks
-				this.checksFailed++;
-				this.homey.log(`Unavailable (${this.checksFailed}): ${errorMessage}`);
+				// Log the error
+				this.onError( err );
 				
 				// Check if it is later than midnight
 				const now = new Date();
@@ -132,7 +127,7 @@ class SolPlanet extends Inverter {
 				
 				if( now > midnight && now < threeAm ) {
 					// Update the daily production
-					await this.setCapabilityValue( "meter_power", 0 );
+					this.setCapabilityValue( "meter_power", 0 ).catch( this.onError.bind( this ) );
 				}
 				
 				if( this.checksFailed > 3 ) {
@@ -141,10 +136,27 @@ class SolPlanet extends Inverter {
 				}
 			}
 		} else if ( !this.api ) {
+			this.homey.log("SolPlanet could not be discovered on your network")
 			await this.setUnavailable(
 				"SolPlanet could not be discovered on your network"
 			);
 		}
+	}
+	
+	onError (error) {
+		const errorMessage = error.message;
+		
+		// If the error message contains the words 'not found' we have to stop the interval
+		// This means the device is not there anymore and we should not do anything...
+		if( errorMessage.toLowerCase().includes('not found') ) {
+			this.homey.log('Device could not be found. Stop the interval');
+			this.stopInterval()
+			return
+		}
+		
+		// Update the fail checks
+		this.checksFailed++;
+		this.homey.log(`Unavailable (${this.checksFailed}): ${errorMessage}`);
 	}
 }
 
