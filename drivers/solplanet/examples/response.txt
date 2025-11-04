@@ -1,5 +1,11 @@
 json_attributes:
 flg # ???
+    Device State:
+    0 = Wait
+    1 = Normal
+    2 = Fault
+    4 = Checking
+
 tim # date/time
 tmp # inverter temperature / 10
 fac # frequency / 100

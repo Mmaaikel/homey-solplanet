@@ -45,7 +45,7 @@
 		},
 		"measure_power": {
 			"title": {
-				"en": "Power (huidig)",
+				"en": "Power (current)",
 				"nl": "Vermogen (huidig)"
 			}
 		},

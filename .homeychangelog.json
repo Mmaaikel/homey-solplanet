@@ -40,5 +40,8 @@
   },
   "1.0.13": {
     "en": "Stop fetch interval when the device is unavailable"
+  },
+  "1.0.14": {
+    "en": "Possible fix for wrong actual power"
   }
 }
