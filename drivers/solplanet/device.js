@@ -83,7 +83,7 @@ class SolPlanet extends Inverter {
 
 					if( deviceState !== 1 ) {
 						if( deviceState === 0 ) {
-							this.setValueWithCatch('meter_power', 0 );
+							this.setValueWithCatch('measure_power', 0 );
 						}
 
 						return;
@@ -139,11 +139,25 @@ class SolPlanet extends Inverter {
 				// Log the error
 				this.onError( err );
 				
+				// Check if it is later than midnight
+				const now = new Date();
+				const midnight = new Date();
+				midnight.setHours(0,0,0,0);
+				
+				// And before 3 AM
+				const threeAm = new Date();
+				threeAm.setHours(3,0,0,0);
+				
+				if( now > midnight && now < threeAm ) {
+					// Update the daily production
+					this.setCapabilityValue( "meter_power", 0 ).catch( this.onError.bind( this ) );
+				}
+
 				if( this.checksFailed > 3 ) {
 					// Change the interval to 5 minutes
 					this.resetInterval( 5 * 60 );
 
-					this.setValueWithCatch('meter_power', 0 );
+					this.setValueWithCatch('measure_power', 0 );
 				}
 			}
 		} else if ( !this.api ) {
