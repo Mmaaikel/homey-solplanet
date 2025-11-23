@@ -1,6 +1,6 @@
 import { Inverter } from "../../inverter";
-
-import SolPlanetApi from "./api";
+import SolPlanetApi from "./library/SolPlanetApi.js";
+import SolPlanetClient from "./library/SolPlanetClient.js";
 import _ from 'lodash'
 
 class SolPlanet extends Inverter {
@@ -16,12 +16,43 @@ class SolPlanet extends Inverter {
 		this.homey.log( 'Settings:', settings )
 		
 		// Init the API
-		this.api = new SolPlanetApi( settings.ip_address, settings.device_nr, settings.device_serial_number );
-		this.homey.log('Api created', this.api.apiUrl )
+		const solPlanetClient = new SolPlanetClient( settings.ip_address, settings.device_serial_number );
+		this.api = new SolPlanetApi( solPlanetClient );
+
+		this.homey.log('Api created', this.api );
 		
 		this.setDefaultInterval()
 		
 		super.onInit();
+
+		// Set some info labels
+		const inverterInfo = await this.api.getInverterInfo();
+		if( inverterInfo !== null ) {
+
+			const primaryInverter = inverterInfo.getPrimaryInverter();
+
+			this.setSettings({
+				solplanet_model_label: primaryInverter.model,
+				solplanet_version_label: primaryInverter.cmv,
+			})
+
+			// Check battery
+			if( primaryInverter.hasBatteryStorage() ) {
+				this.homey.log("Inverter has battery storage");
+
+				const batteryInfo = await this.api.getBatteryInfo();
+				if( batteryInfo !== null ) {
+
+					this.homey.log("Battery info fetched", batteryInfo );
+
+					this.setSettings({
+						solplanet_battery_model_label: batteryInfo.battery?.manufactoty ?? 'Unknown',
+					})
+				}
+			} else {
+				this.homey.log("Inverter does not have battery storage");
+			}
+		}
 	}
 	
 	setDefaultInterval() {
@@ -33,10 +64,12 @@ class SolPlanet extends Inverter {
 	
 	async onSettings({ newSettings, changedKeys}) {
 		// Init the API with new settings
-		const newApi = new SolPlanetApi( newSettings.ip_address, newSettings.device_nr, newSettings.device_serial_number );
+		const solPlanetClient = new SolPlanetClient( newSettings.ip_address, newSettings.device_serial_number );
+		const newApi = new SolPlanetApi( solPlanetClient );
 		
 		// Validate
-		if( await newApi.validate() === false ) {
+		const inverterInfo = await solPlanetApi.getInverterInfo();
+		if( inverterInfo === null ) {
 			throw new Error(
 				`Could not fetch the correct data. Check the settings.`
 			);
@@ -66,19 +99,24 @@ class SolPlanet extends Inverter {
 		
 		if( this.api ) {
 			try {
-				const productionData = await this.api.getData();
+
+				const inverterInfo = await this.api.getInverterInfo();
+				if( inverterInfo !== null ) {
+
+					// Setting?
+					const primaryInverter = inverterInfo.getPrimaryInverter();
+
+					// Also get the data now
+					const inverterData = await this.api.getInverterData();
 				
-				// Check the data
-				if( this.api.isValid( productionData ) ) {
-					
 					// Reset the checks failed
 					if( this.checksFailed > 0 ) {
 						this.checksFailed = 0;
 						this.setDefaultInterval()
 					}
 
-					// FLG
-					const deviceState = _.parseInt( productionData.flg );
+					// FLG -> the current state of the device
+					const deviceState = _.parseInt( inverterData.flg );
 					this.homey.log( `Current device state is: ${ deviceState }` );
 
 					if( deviceState !== 1 ) {
@@ -90,7 +128,7 @@ class SolPlanet extends Inverter {
 					}
 					
 					// Temperature
-					const currentTemperature = Number( _.parseInt( productionData.tmp ) / 10 );
+					const currentTemperature = Number( _.parseInt( inverterData.tmp ) / 10 );
 					this.homey.log( `Current inverter temperature is: ${ currentTemperature }` );
 					
 					if( currentTemperature !== undefined ) {
@@ -98,19 +136,8 @@ class SolPlanet extends Inverter {
 					}
 					
 					// Current (w)
-					let currentProductionPower = Number( _.parseInt( productionData.pac ) );
+					let currentProductionPower = Number( _.parseInt( primaryInverter.pac ) );
 					this.homey.log( `Current production power is: ${ currentProductionPower }W` );
-
-					// -> Check if pac1 exists
-					if( productionData.pac1 !== undefined ) {
-						const currentProductionPowerPac1 = Number( _.parseInt( productionData.pac1 ) );
-						this.homey.log( `Current production power PAC1 is: ${ currentProductionPowerPac1 }W` );
-
-						// Use pac1 if available
-						if( currentProductionPowerPac1 !== undefined ) {
-							currentProductionPower = currentProductionPowerPac1;
-						}
-					}
 					
 					// Ignore when the current production power is more than 20k?
 					if( currentProductionPower !== undefined && currentProductionPower <= 20000 ) {
@@ -118,7 +145,7 @@ class SolPlanet extends Inverter {
 					}
 					
 					// Daily (kWh)
-					const dailyProductionEnergy = Number( _.parseInt( productionData.etd ) / 10 );
+					const dailyProductionEnergy = Number( _.parseInt( primaryInverter.etd ) / 10 );
 					this.homey.log( `Daily production energy is: ${ dailyProductionEnergy }kWh` );
 					
 					if( dailyProductionEnergy !== undefined ) {
@@ -126,11 +153,29 @@ class SolPlanet extends Inverter {
 					}
 					
 					// Total (kWh)
-					const totalProductionEnergy = Number( _.parseInt( productionData.eto ) / 10 );
+					const totalProductionEnergy = Number( _.parseInt( primaryInverter.eto ) / 10 );
 					this.homey.log( `Total production energy is: ${ totalProductionEnergy }kWh` );
 					
 					if( totalProductionEnergy !== undefined ) {
 						this.setValueWithCatch("meter_power.total", totalProductionEnergy);
+					}
+
+					// Check if there is a battery
+					if( primaryInverter.hasBatteryStorage() ) {
+
+						// Get the battery info
+						const batteryData = await this.api.getBatteryData();
+
+						if( batteryData !== null ) {
+
+							// Battery %
+							const batteryPower = Number( _.parseInt( batteryData.soc ) );
+							this.homey.log( `Battery percentage is: ${ batteryPower }%` );
+							
+							if( batteryPower !== undefined ) {
+								this.setValueWithCatch("measure_battery", batteryPower);
+							}
+						}
 					}
 					
 					this.setAvailable().catch( this.onError.bind( this ) );

@@ -1,6 +1,7 @@
 import { Driver } from "homey";
-import SolPlanetApi from './api'
 import { randomUUID } from 'node:crypto'
+import SolPlanetApi from './library/SolPlanetApi';
+import SolPlanetClient from "./library/SolPlanetClient";
 
 class SolPlanetDriver extends Driver {
 	
@@ -9,26 +10,26 @@ class SolPlanetDriver extends Driver {
 	deviceSerialNr;
 	
 	async onPair( session ) {
-		session.setHandler("validate", async ({ ipAddress, deviceNr, deviceSerialNr } = {}) => {
+
+		session.setHandler("validate", async ({ ipAddress, deviceSerialNr } = {}) => {
 			this.homey.log("Pair data received" );
 			this.homey.log("IP Address", ipAddress );
-			this.homey.log("Device Nr", deviceNr );
 			this.homey.log("Device Serial Nr", deviceSerialNr );
 			
 			this.ipAddress = ipAddress ?? '';
-			this.deviceNr = deviceNr ?? '';
 			this.deviceSerialNr = deviceSerialNr ?? '';
+
+			const solPlanetClient = new SolPlanetClient( this.ipAddress, this.deviceSerialNr );
+			const solPlanetApi = new SolPlanetApi( solPlanetClient );
 			
-			const api = new SolPlanetApi( this.ipAddress, this.deviceNr, this.deviceSerialNr );
-			
-			const systemName = await api.getSystemName();
-			if( systemName === null ) {
+			const inverterInfo = await solPlanetApi.getInverterInfo();
+			if( inverterInfo === null ) {
 				return {
 					error: "Could not fetch the correct data. Check the settings."
 				}
 			}
 			
-			return systemName;
+			return inverterInfo.model;
 		});
 		
 		session.setHandler("list_devices", async () => {
@@ -37,24 +38,28 @@ class SolPlanetDriver extends Driver {
 			const devicesList = [];
 			
 			try {
-				if( this.ipAddress && this.deviceNr && this.deviceSerialNr ) {
-					const api = new SolPlanetApi( this.ipAddress, this.deviceNr, this.deviceSerialNr );
+				if( this.ipAddress && this.deviceSerialNr ) {
+
+					const solPlanetClient = new SolPlanetClient( this.ipAddress, this.deviceSerialNr );
+					const solPlanetApi = new SolPlanetApi( solPlanetClient );
+
+					const inverterInfo = await solPlanetApi.getInverterInfo();
+					if( inverterInfo !== null ) {
+
+						const primaryInverter = inverterInfo.getPrimaryInverter();
+
+						// Get the system name
+						const sid = primaryInverter.isn || randomUUID();
+
+						this.homey.log('System name: ', primaryInverter.model, sid );
 					
-					// Get the system name
-					const sid = randomUUID();
-					const systemName = await api.getSystemName();
-					
-					this.homey.log('System name: ', systemName, sid );
-					
-					if( systemName !== null ) {
 						devicesList.push({
-							name: systemName,
+							name: primaryInverter.model,
 							data: {
 								sid: sid,
 							},
 							settings: {
 								ip_address: this.ipAddress,
-								device_nr: this.deviceNr,
 								device_serial_number: this.deviceSerialNr,
 							},
 						});

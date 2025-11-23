@@ -1,0 +1,17 @@
+http://{IP}:8484/getdevdata.cgi?device=2&sn={SN}
+{"flg":1,"tim":"20251119190535","tmp":342,"fac":5000,"pac":0,"sac":18,"qac":0,"eto":9583,"etd":75,"hto":1155,"pf":-100,"wan":0,"err":0,"vac":[2301,2223,2284],"iac":[6,6,6],"vpv":[585,154],"ipv":[4,2],"str":[],"stu":1,"pac1":-6,"qac1":0,"pac2":-1,"qac2":0,"pac3":-9,"qac3":0}
+
+http://{IP}:8484/getdev.cgi?device=2&sn={SN}
+{"inv":[{"isn":"OE010K60Y2540129","add":3,"safety":69,"rate":10000,"msw":"V610-05001-14.000  ","ssw":"V610-60015-00 ","tsw":"V610-11022-11 ","pac":0,"etd":75,"eto":9583,"err":0,"cmv":"V2.1.6      ","mty":13,"typ":3,"model":"ASW10kH-T2","Isw":"V610-50106-06.000","afci":"","battery_topo":[{"bat_sn":"20034255100042","bat_id":1}],"host":0}],"num":1}
+
+http://{IP}:8484/getdevdata.cgi?device=3&sn={SN}
+{"flg":1,"tim":"","pac":3951,"itd":547,"otd":0,"iet":1469,"oet":2025,"mod":1,"state_g100":0,"power_limit_mode":0,"billing_method":0}
+
+http://{IP}:8484/getdev.cgi?device=3&sn={SN}
+{"mod":1,"enb":1,"exp_m":0,"regulate":5,"enb_PF":0,"target_PF":0,"in_cur_g100":630,"out_cur_g100":0,"usage_type_g100":0,"com_interruption_enable_g100":0,"power_limit_mode":0,"billing_method":0,"abs":0,"abs_offset":0,"total_pac":0,"total_fac":10000,"meter_pac":4003}
+
+http://{IP}:8484/getdevdata.cgi?device=3&sn={SN}
+{"flg":1,"tim":"","pac":4019,"itd":561,"otd":0,"iet":1471,"oet":2025,"mod":1,"state_g100":0,"power_limit_mode":0,"billing_method":0}
+
+http://{IP}:8484/getdev.cgi?device=3&sn={SN}
+{"mod":1,"enb":1,"exp_m":0,"regulate":5,"enb_PF":0,"target_PF":0,"in_cur_g100":630,"out_cur_g100":0,"usage_type_g100":0,"com_interruption_enable_g100":0,"power_limit_mode":0,"billing_method":0,"abs":0,"abs_offset":0,"total_pac":0,"total_fac":10000,"meter_pac":4017}

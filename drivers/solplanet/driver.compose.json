@@ -32,8 +32,9 @@
 	],
 	"capabilities": [
 		"measure_power",
-		"meter_power",
 		"measure_temperature",
+		"measure_battery",
+		"meter_power",
 		"meter_power.total"
 	],
 	"capabilitiesOptions": {
@@ -54,6 +55,18 @@
 				"en": "Energy yield (today)",
 				"nl": "Energieproductie (vandaag)"
 			}
+		},
+		"meter_power.total": {
+			"title": {
+				"en": "Total energy yield",
+				"nl": "Totale energieproductie"
+			}
+		},
+		"measure_battery": {
+			"title": {
+				"en": "Battery charge",
+				"nl": "Batterij lading"
+			}
 		}
 	},
 	"id": "solplanet",
@@ -63,13 +76,6 @@
 			"type": "text",
 			"label": {
 				"en": "SolPlanet inverter IP address"
-			}
-		},
-		{
-			"id": "device_nr",
-			"type": "text",
-			"label": {
-				"en": "Device number (usually 2)"
 			}
 		},
 		{
@@ -88,7 +94,35 @@
 			"label": {
 				"en": "Fetch interval (in seconds)"
 			}
+		},
+
+		{
+			"id": "solplanet_model_label",
+			"type": "label",
+			"label": {
+				"en": "Model name"
+			},
+			"value": ""
+		},
+		{
+			"id": "solplanet_version_label",
+			"type": "label",
+			"label": {
+				"en": "Version"
+			},
+			"value": ""
+		},
+		{
+			"id": "solplanet_battery_model_label",
+			"type": "label",
+			"label": {
+				"en": "Battery model"
+			},
+			"value": ""
 		}
 	],
+	"energy": {
+    	"homeBattery": true
+	},
 	"homeyCommunityTopicId": null
 }
