@@ -46,5 +46,8 @@
   },
   "1.0.15": {
     "en": "Fix for setting wrong value"
+  },
+  "1.1.0": {
+    "en": "Added information for batteries"
   }
 }
