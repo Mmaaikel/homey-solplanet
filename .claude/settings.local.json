@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(homey app run:*)",
+      "Bash(git checkout:*)",
+      "Bash(timeout 70 homey app run:*)"
+    ]
+  }
+}

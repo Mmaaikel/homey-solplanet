@@ -4,31 +4,31 @@
 		flex-direction: column;
 		height: 100%;
 	}
-	
+
 	.homey-solarpanels-submit-button {
 		margin-top: auto;
 	}
-	
+
 	.homey-solarpanels-help {
 		display: flex;
 		align-items: center;
-		
+
 		color: var(--homey-color-text-light);
 	}
-	
+
 	.homey-solarpanels-help > svg {
 		width: 1.25em;
 		height: 1.25em;
-		
+
 		fill: var(--homey-color-text-light);
-		
+
 		margin-right: 0.5em;
 	}
 </style>
 
 <form class="homey-form homey-solarpanels-form" onsubmit="onConnect(event)">
-	<h1 class="homey-title">Please enter your details</h1>
-	
+	<h1 class="homey-title">Connect your inverter with battery</h1>
+
 	<div class="homey-form-group">
 		<label class="homey-form-label" for="ip_address">Inverter IP address</label>
 		<input
@@ -39,7 +39,7 @@
 			placeholder="192.168.1.20"
 			value=""
 		/>
-		
+
 		<label class="homey-form-label" for="device_nr">Device number</label>
 		<input
 			class="homey-form-input"
@@ -49,7 +49,7 @@
 			placeholder="2"
 			value="2"
 		/>
-		
+
 		<label class="homey-form-label" for="device_serial_number">Device serial number (can be found on your inverter)</label>
 		<input
 			class="homey-form-input"
@@ -60,11 +60,11 @@
 			value=""
 		/>
 	</div>
-	
+
 	<button
 		class="homey-button-primary-full homey-solarpanels-submit-button"
 		type="submit">
-		
+
 		Connect
 	</button>
 </form>

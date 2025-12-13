@@ -40,6 +40,12 @@ class SolPlanet extends Inverter {
 			if( primaryInverter.hasBatteryStorage() ) {
 				this.homey.log("Inverter has battery storage");
 
+				// Add battery_soc capability if not present
+				if( !this.hasCapability('battery_soc') ) {
+					await this.addCapability('battery_soc');
+					this.homey.log("Added battery_soc capability");
+				}
+
 				const batteryInfo = await this.api.getBatteryInfo();
 				if( batteryInfo !== null ) {
 
@@ -144,18 +150,18 @@ class SolPlanet extends Inverter {
 						this.setValueWithCatch("measure_power", currentProductionPower);
 					}
 					
-					// Daily (kWh)
-					const dailyProductionEnergy = Number( _.parseInt( primaryInverter.etd ) / 10 );
+					// Daily (kWh) - etd field
+					const dailyProductionEnergy = Math.abs( Number( _.parseInt( primaryInverter.etd ) / 10 ) );
 					this.homey.log( `Daily production energy is: ${ dailyProductionEnergy }kWh` );
-					
+
 					if( dailyProductionEnergy !== undefined ) {
 						this.setValueWithCatch("meter_power", dailyProductionEnergy);
 					}
-					
-					// Total (kWh)
-					const totalProductionEnergy = Number( _.parseInt( primaryInverter.eto ) / 10 );
+
+					// Total (kWh) - eto field
+					const totalProductionEnergy = Math.abs( Number( _.parseInt( primaryInverter.eto ) / 10 ) );
 					this.homey.log( `Total production energy is: ${ totalProductionEnergy }kWh` );
-					
+
 					if( totalProductionEnergy !== undefined ) {
 						this.setValueWithCatch("meter_power.total", totalProductionEnergy);
 					}
@@ -173,7 +179,7 @@ class SolPlanet extends Inverter {
 							this.homey.log( `Battery percentage is: ${ batteryPower }%` );
 							
 							if( batteryPower !== undefined ) {
-								this.setValueWithCatch("measure_battery", batteryPower);
+								this.setValueWithCatch("battery_soc", batteryPower);
 							}
 						}
 					}
