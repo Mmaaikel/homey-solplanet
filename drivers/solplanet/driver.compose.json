@@ -40,32 +40,32 @@
 	"capabilitiesOptions": {
 		"measure_temperature": {
 			"title": {
-				"en": "Inverter temperature",
-				"nl": "Temperatuur omvormer"
+				"en": "Inverter Temperature",
+				"nl": "Omvormer Temperatuur"
 			}
 		},
 		"measure_power": {
 			"title": {
-				"en": "Power (current)",
-				"nl": "Vermogen (huidig)"
+				"en": "AC Power Now (W)",
+				"nl": "AC Vermogen Nu (W)"
 			}
 		},
 		"meter_power": {
 			"title": {
-				"en": "Energy (today)",
-				"nl": "Energie (vandaag)"
+				"en": "Production Today (kWh)",
+				"nl": "Productie Vandaag (kWh)"
 			}
 		},
 		"meter_power.total": {
 			"title": {
-				"en": "Energy Total",
-				"nl": "Energie Totaal"
+				"en": "Production Lifetime (kWh)",
+				"nl": "Productie Totaal (kWh)"
 			}
 		},
 		"battery_soc": {
 			"title": {
-				"en": "Battery charge",
-				"nl": "Batterij lading"
+				"en": "Battery Charge Level (%)",
+				"nl": "Batterij Laadniveau (%)"
 			}
 		}
 	},

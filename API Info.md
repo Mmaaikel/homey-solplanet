@@ -12,7 +12,7 @@ Data retrieved via `getInverterData()` and `getInverterInfo()`.
 |---------------|-------------|---------|------|----------------------|---------------------------|
 | `flg` | Device state flag. `0` = offline/sleeping, `1` = running/producing | - | - | Used for state check | Used for state check |
 | `tmp` | Inverter internal temperature | 10 | °C | `measure_temperature` | `measure_temperature` |
-| `pac` | Current AC power output from inverter (power being delivered) | 1 | W | `measure_power` | `measure_power.solar` |
+| `pac` | Inverter AC power. Positive = output, Negative = consumption (hybrid inverters charging from grid) | 1 | W | `measure_power` | `measure_power.solar` |
 | `etd` | Energy produced today (daily production counter, resets at midnight) | 10 | kWh | `meter_power` | `meter_power.solar_today` |
 | `eto` | Energy produced total (lifetime production counter) | 10 | kWh | `meter_power.total` | `meter_power.solar_total` |
 | `model` | Inverter model name (e.g., "ASW5000-S") | - | - | Settings label | Settings label |

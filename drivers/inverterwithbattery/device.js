@@ -131,15 +131,16 @@ class InverterWithBattery extends Inverter {
 						this.setValueWithCatch("measure_temperature", currentTemperature);
 					}
 
-					// Solar power (W)
-					let currentSolarPower = Number( _.parseInt( primaryInverter.pac ) );
-					this.homey.log( `Current solar power is: ${ currentSolarPower }W` );
+					// Inverter AC power (W) - can be negative for hybrid inverters
+					// Positive = power output, Negative = power consumption (e.g., charging from grid)
+					let inverterPower = Number( _.parseInt( primaryInverter.pac ) );
+					this.homey.log( `Inverter AC power is: ${ inverterPower }W` );
 
-					if( currentSolarPower !== undefined && currentSolarPower <= 20000 ) {
-						this.setValueWithCatch("measure_power.solar", currentSolarPower);
+					if( inverterPower !== undefined && Math.abs(inverterPower) <= 20000 ) {
+						this.setValueWithCatch("measure_power.solar", inverterPower);
 					}
 
-					// Solar energy today (kWh)
+					// Solar energy today (kWh) - etd field
 					const solarEnergyToday = Math.abs( Number( _.parseInt( primaryInverter.etd ) / 10 ) );
 					this.homey.log( `Solar energy today is: ${ solarEnergyToday }kWh` );
 
@@ -147,8 +148,8 @@ class InverterWithBattery extends Inverter {
 						this.setValueWithCatch("meter_power.solar_today", solarEnergyToday);
 					}
 
-					// Solar energy total (kWh)
-					const solarEnergyTotal = Number( _.parseInt( primaryInverter.eto ) / 10 );
+					// Solar energy total (kWh) - eto field
+					const solarEnergyTotal = Math.abs( Number( _.parseInt( primaryInverter.eto ) / 10 ) );
 					this.homey.log( `Solar energy total is: ${ solarEnergyTotal }kWh` );
 
 					if( solarEnergyTotal !== undefined ) {
@@ -211,7 +212,7 @@ class InverterWithBattery extends Inverter {
 				}
 
 				// Grid import today (kWh) - itd is in 0.01 kWh
-				const gridImportToday = Number( _.parseInt( meterData.itd ) / 100 );
+				const gridImportToday = Math.abs( Number( _.parseInt( meterData.itd ) / 100 ) );
 				this.homey.log( `Grid import today is: ${ gridImportToday }kWh` );
 
 				if( gridImportToday !== undefined ) {
@@ -219,7 +220,7 @@ class InverterWithBattery extends Inverter {
 				}
 
 				// Grid export today (kWh) - otd is in 0.01 kWh
-				const gridExportToday = Number( _.parseInt( meterData.otd ) / 100 );
+				const gridExportToday = Math.abs( Number( _.parseInt( meterData.otd ) / 100 ) );
 				this.homey.log( `Grid export today is: ${ gridExportToday }kWh` );
 
 				if( gridExportToday !== undefined ) {
@@ -227,7 +228,7 @@ class InverterWithBattery extends Inverter {
 				}
 
 				// Grid import total (kWh) - iet is in 0.1 kWh
-				const gridImportTotal = Number( _.parseInt( meterData.iet ) / 10 );
+				const gridImportTotal = Math.abs( Number( _.parseInt( meterData.iet ) / 10 ) );
 				this.homey.log( `Grid import total is: ${ gridImportTotal }kWh` );
 
 				if( gridImportTotal !== undefined ) {
@@ -235,7 +236,7 @@ class InverterWithBattery extends Inverter {
 				}
 
 				// Grid export total (kWh) - oet is in 0.1 kWh
-				const gridExportTotal = Number( _.parseInt( meterData.oet ) / 10 );
+				const gridExportTotal = Math.abs( Number( _.parseInt( meterData.oet ) / 10 ) );
 				this.homey.log( `Grid export total is: ${ gridExportTotal }kWh` );
 
 				if( gridExportTotal !== undefined ) {
@@ -269,7 +270,7 @@ class InverterWithBattery extends Inverter {
 				}
 
 				// Battery charge total (kWh) - ebi is in 0.1 kWh
-				const batteryChargeTotal = Number( _.parseInt( batteryData.ebi ) / 10 );
+				const batteryChargeTotal = Math.abs( Number( _.parseInt( batteryData.ebi ) / 10 ) );
 				this.homey.log( `Battery charge total is: ${ batteryChargeTotal }kWh` );
 
 				if( batteryChargeTotal !== undefined ) {
@@ -277,7 +278,7 @@ class InverterWithBattery extends Inverter {
 				}
 
 				// Battery discharge total (kWh) - ebo is in 0.1 kWh
-				const batteryDischargeTotal = Number( _.parseInt( batteryData.ebo ) / 10 );
+				const batteryDischargeTotal = Math.abs( Number( _.parseInt( batteryData.ebo ) / 10 ) );
 				this.homey.log( `Battery discharge total is: ${ batteryDischargeTotal }kWh` );
 
 				if( batteryDischargeTotal !== undefined ) {
