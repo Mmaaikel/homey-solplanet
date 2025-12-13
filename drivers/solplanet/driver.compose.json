@@ -33,7 +33,7 @@
 	"capabilities": [
 		"measure_power",
 		"measure_temperature",
-		"measure_battery",
+		"battery_soc",
 		"meter_power",
 		"meter_power.total"
 	],
@@ -52,17 +52,17 @@
 		},
 		"meter_power": {
 			"title": {
-				"en": "Energy yield (today)",
-				"nl": "Energieproductie (vandaag)"
+				"en": "Energy (today)",
+				"nl": "Energie (vandaag)"
 			}
 		},
 		"meter_power.total": {
 			"title": {
-				"en": "Total energy yield",
-				"nl": "Totale energieproductie"
+				"en": "Energy Total",
+				"nl": "Energie Totaal"
 			}
 		},
-		"measure_battery": {
+		"battery_soc": {
 			"title": {
 				"en": "Battery charge",
 				"nl": "Batterij lading"
@@ -122,7 +122,7 @@
 		}
 	],
 	"energy": {
-    	"homeBattery": true
+		"batteries": ["INTERNAL"]
 	},
 	"homeyCommunityTopicId": null
 }
