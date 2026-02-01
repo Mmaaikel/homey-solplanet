@@ -35,7 +35,7 @@
 		"measure_temperature",
 		"battery_soc",
 		"meter_power",
-		"meter_power.total"
+		"meter_power.today"
 	],
 	"capabilitiesOptions": {
 		"measure_temperature": {
@@ -52,14 +52,14 @@
 		},
 		"meter_power": {
 			"title": {
-				"en": "Production Today (kWh)",
-				"nl": "Productie Vandaag (kWh)"
-			}
-		},
-		"meter_power.total": {
-			"title": {
 				"en": "Production Lifetime (kWh)",
 				"nl": "Productie Totaal (kWh)"
+			}
+		},
+		"meter_power.today": {
+			"title": {
+				"en": "Production Today (kWh)",
+				"nl": "Productie Vandaag (kWh)"
 			}
 		},
 		"battery_soc": {
@@ -111,18 +111,10 @@
 				"en": "Version"
 			},
 			"value": ""
-		},
-		{
-			"id": "solplanet_battery_model_label",
-			"type": "label",
-			"label": {
-				"en": "Battery model"
-			},
-			"value": ""
 		}
 	],
 	"energy": {
-		"batteries": ["INTERNAL"]
+		"meterPowerExportedCapability": "meter_power"
 	},
 	"homeyCommunityTopicId": null
 }

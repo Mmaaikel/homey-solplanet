@@ -1,8 +1,8 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "nl.mmaaikel.solplanet",
-  "version": "1.1.0",
-  "compatibility": ">=5.0.0",
+  "version": "1.2.0",
+  "compatibility": ">=12.0.0",
   "sdk": 3,
   "platforms": [
     "local"
@@ -29,12 +29,12 @@
   "drivers": [
     {
       "name": {
-        "en": "Inverter with Battery",
-        "nl": "Omvormer met Batterij"
+        "en": "Hybrid Inverter (Battery)",
+        "nl": "Hybride Omvormer (Batterij)"
       },
       "images": {
-        "large": "/drivers/inverterwithbattery/assets/images/large.jpg",
-        "small": "/drivers/inverterwithbattery/assets/images/small.jpg"
+        "large": "/drivers/hybridbattery/assets/images/large.jpg",
+        "small": "/drivers/hybridbattery/assets/images/small.jpg"
       },
       "connectivity": [
         "lan"
@@ -42,7 +42,10 @@
       "platforms": [
         "local"
       ],
-      "class": "solarpanel",
+      "class": "battery",
+      "energy": {
+        "homeBattery": true
+      },
       "pair": [
         {
           "id": "pair"
@@ -60,45 +63,138 @@
         }
       ],
       "capabilities": [
-        "measure_power.solar",
-        "measure_power.grid",
-        "measure_power.battery",
+        "measure_power",
         "battery_soc",
-        "measure_temperature",
-        "meter_power.solar_today",
-        "meter_power.solar_total",
-        "meter_power.grid_import_today",
-        "meter_power.grid_export_today",
-        "meter_power.grid_import_total",
-        "meter_power.grid_export_total",
-        "meter_power.battery_charge_total",
-        "meter_power.battery_discharge_total"
+        "meter_power.battery_charge_today",
+        "meter_power.battery_discharge_today"
       ],
       "capabilitiesOptions": {
-        "measure_power.solar": {
+        "measure_power": {
           "title": {
-            "en": "Inverter Power (W)",
-            "nl": "Omvormer Vermogen (W)"
+            "en": "Battery Power (W)",
+            "nl": "Batterijvermogen (W)"
           }
-        },
-        "measure_power.grid": {
-          "title": {
-            "en": "Grid Power Now (W)",
-            "nl": "Netvermogen Nu (W)"
-          },
-          "insights": true
-        },
-        "measure_power.battery": {
-          "title": {
-            "en": "Battery Power Now (W)",
-            "nl": "Batterijvermogen Nu (W)"
-          },
-          "insights": true
         },
         "battery_soc": {
           "title": {
             "en": "Battery Charge Level (%)",
             "nl": "Batterij Laadniveau (%)"
+          }
+        },
+        "meter_power.battery_charge_today": {
+          "title": {
+            "en": "Battery Charged Today (kWh)",
+            "nl": "Batterij Opgeladen Vandaag (kWh)"
+          }
+        },
+        "meter_power.battery_discharge_today": {
+          "title": {
+            "en": "Battery Discharged Today (kWh)",
+            "nl": "Batterij Ontladen Vandaag (kWh)"
+          }
+        }
+      },
+      "settings": [
+        {
+          "id": "ip_address",
+          "type": "text",
+          "label": {
+            "en": "SolPlanet inverter IP address"
+          }
+        },
+        {
+          "id": "device_serial_number",
+          "type": "text",
+          "label": {
+            "en": "Device serial number (can be found at the online dashboard)"
+          }
+        },
+        {
+          "id": "interval",
+          "type": "number",
+          "value": 60,
+          "min": 5,
+          "max": 300,
+          "label": {
+            "en": "Fetch interval (in seconds)"
+          }
+        },
+        {
+          "id": "solplanet_model_label",
+          "type": "label",
+          "label": {
+            "en": "Model name"
+          },
+          "value": ""
+        },
+        {
+          "id": "solplanet_battery_model_label",
+          "type": "label",
+          "label": {
+            "en": "Battery model"
+          },
+          "value": ""
+        }
+      ],
+      "id": "hybridbattery"
+    },
+    {
+      "name": {
+        "en": "Hybrid Inverter (Solar)",
+        "nl": "Hybride Omvormer (Zonne-energie)"
+      },
+      "images": {
+        "large": "/drivers/hybridsolar/assets/images/large.jpg",
+        "small": "/drivers/hybridsolar/assets/images/small.jpg"
+      },
+      "connectivity": [
+        "lan"
+      ],
+      "platforms": [
+        "local"
+      ],
+      "class": "solarpanel",
+      "energy": {
+        "meterPowerExportedCapability": "meter_power"
+      },
+      "pair": [
+        {
+          "id": "pair"
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "capabilities": [
+        "measure_power",
+        "meter_power",
+        "measure_temperature",
+        "meter_power.solar_today",
+        "measure_power.grid",
+        "meter_power.grid_import_today",
+        "meter_power.grid_export_today",
+        "meter_power.grid_import_total",
+        "meter_power.grid_export_total"
+      ],
+      "capabilitiesOptions": {
+        "measure_power": {
+          "title": {
+            "en": "Solar Power (W)",
+            "nl": "Zonne-energie (W)"
+          }
+        },
+        "meter_power": {
+          "title": {
+            "en": "Solar Energy Lifetime (kWh)",
+            "nl": "Zonne-energie Totaal (kWh)"
           }
         },
         "measure_temperature": {
@@ -109,15 +205,16 @@
         },
         "meter_power.solar_today": {
           "title": {
-            "en": "Production Today (kWh)",
-            "nl": "Productie Vandaag (kWh)"
+            "en": "Solar Energy Today (kWh)",
+            "nl": "Zonne-energie Vandaag (kWh)"
           }
         },
-        "meter_power.solar_total": {
+        "measure_power.grid": {
           "title": {
-            "en": "Production Lifetime (kWh)",
-            "nl": "Productie Totaal (kWh)"
-          }
+            "en": "Grid Power Now (W)",
+            "nl": "Netvermogen Nu (W)"
+          },
+          "insights": true
         },
         "meter_power.grid_import_today": {
           "title": {
@@ -141,18 +238,6 @@
           "title": {
             "en": "Grid Export Lifetime (kWh)",
             "nl": "Net Export Totaal (kWh)"
-          }
-        },
-        "meter_power.battery_charge_total": {
-          "title": {
-            "en": "Battery Charged Lifetime (kWh)",
-            "nl": "Batterij Opgeladen Totaal (kWh)"
-          }
-        },
-        "meter_power.battery_discharge_total": {
-          "title": {
-            "en": "Battery Discharged Lifetime (kWh)",
-            "nl": "Batterij Ontladen Totaal (kWh)"
           }
         }
       },
@@ -196,17 +281,9 @@
             "en": "Version"
           },
           "value": ""
-        },
-        {
-          "id": "solplanet_battery_model_label",
-          "type": "label",
-          "label": {
-            "en": "Battery model"
-          },
-          "value": ""
         }
       ],
-      "id": "inverterwithbattery"
+      "id": "hybridsolar"
     },
     {
       "name": {
@@ -245,7 +322,7 @@
         "measure_temperature",
         "battery_soc",
         "meter_power",
-        "meter_power.total"
+        "meter_power.today"
       ],
       "capabilitiesOptions": {
         "measure_temperature": {
@@ -262,14 +339,14 @@
         },
         "meter_power": {
           "title": {
-            "en": "Production Today (kWh)",
-            "nl": "Productie Vandaag (kWh)"
-          }
-        },
-        "meter_power.total": {
-          "title": {
             "en": "Production Lifetime (kWh)",
             "nl": "Productie Totaal (kWh)"
+          }
+        },
+        "meter_power.today": {
+          "title": {
+            "en": "Production Today (kWh)",
+            "nl": "Productie Vandaag (kWh)"
           }
         },
         "battery_soc": {
@@ -320,20 +397,10 @@
             "en": "Version"
           },
           "value": ""
-        },
-        {
-          "id": "solplanet_battery_model_label",
-          "type": "label",
-          "label": {
-            "en": "Battery model"
-          },
-          "value": ""
         }
       ],
       "energy": {
-        "batteries": [
-          "INTERNAL"
-        ]
+        "meterPowerExportedCapability": "meter_power"
       },
       "homeyCommunityTopicId": null
     }

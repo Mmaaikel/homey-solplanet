@@ -1,0 +1,110 @@
+{
+  "name": {
+    "en": "Hybrid Inverter (Battery)",
+    "nl": "Hybride Omvormer (Batterij)"
+  },
+  "images": {
+    "large": "/drivers/hybridbattery/assets/images/large.jpg",
+    "small": "/drivers/hybridbattery/assets/images/small.jpg"
+  },
+  "connectivity": [
+    "lan"
+  ],
+  "platforms": [
+    "local"
+  ],
+  "class": "battery",
+  "energy": {
+    "homeBattery": true
+  },
+  "pair": [
+    {
+      "id": "pair"
+    },
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_devices"
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ],
+  "capabilities": [
+    "measure_power",
+    "battery_soc",
+    "meter_power.battery_charge_today",
+    "meter_power.battery_discharge_today"
+  ],
+  "capabilitiesOptions": {
+    "measure_power": {
+      "title": {
+        "en": "Battery Power (W)",
+        "nl": "Batterijvermogen (W)"
+      }
+    },
+    "battery_soc": {
+      "title": {
+        "en": "Battery Charge Level (%)",
+        "nl": "Batterij Laadniveau (%)"
+      }
+    },
+    "meter_power.battery_charge_today": {
+      "title": {
+        "en": "Battery Charged Today (kWh)",
+        "nl": "Batterij Opgeladen Vandaag (kWh)"
+      }
+    },
+    "meter_power.battery_discharge_today": {
+      "title": {
+        "en": "Battery Discharged Today (kWh)",
+        "nl": "Batterij Ontladen Vandaag (kWh)"
+      }
+    }
+  },
+  "settings": [
+    {
+      "id": "ip_address",
+      "type": "text",
+      "label": {
+        "en": "SolPlanet inverter IP address"
+      }
+    },
+    {
+      "id": "device_serial_number",
+      "type": "text",
+      "label": {
+        "en": "Device serial number (can be found at the online dashboard)"
+      }
+    },
+    {
+      "id": "interval",
+      "type": "number",
+      "value": 60,
+      "min": 5,
+      "max": 300,
+      "label": {
+        "en": "Fetch interval (in seconds)"
+      }
+    },
+    {
+      "id": "solplanet_model_label",
+      "type": "label",
+      "label": {
+        "en": "Model name"
+      },
+      "value": ""
+    },
+    {
+      "id": "solplanet_battery_model_label",
+      "type": "label",
+      "label": {
+        "en": "Battery model"
+      },
+      "value": ""
+    }
+  ]
+}

@@ -4,9 +4,9 @@ class BatteryData {
 
     flg; // Battery status flag
     tim; // Timestamp of data
-    ppv; // PV power in W
-    etdpv; // PV energy today in 0.1 kWh
-    etopv; // PV energy total in 0.1 kWh
+    ppv; // PV/Solar power in W (current solar production)
+    etdpv; // PV/Solar energy today in 0.1 kWh (daily, resets at midnight)
+    etopv; // PV/Solar energy total in 0.1 kWh (lifetime)
     cst; // Communication status code
     bst; // Battery status code
     eb1; // Battery error code group 1
@@ -25,8 +25,8 @@ class BatteryData {
     soh; // State of health in %
     cli; // Current limit for charging in 0.1 A
     clo; // Current limit for discharging in 0.1 A
-    ebi; // Battery energy for charging in 0.1 kWh
-    ebo; // Battery energy for discharging in 0.1 kWh
+    ebi; // Battery energy charged today in 0.1 kWh (daily, resets at midnight)
+    ebo; // Battery energy discharged today in 0.1 kWh (daily, resets at midnight)
     eaci; // AC energy for charging in 0.1 kWh
     eaco; // AC energy for discharging in 0.1 kWh
     vesp; // EPS voltage in 0.1 V

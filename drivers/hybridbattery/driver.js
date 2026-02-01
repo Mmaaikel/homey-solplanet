@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto'
 import SolPlanetApi from '../solplanet/library/SolPlanetApi';
 import SolPlanetClient from "../solplanet/library/SolPlanetClient";
 
-class InverterWithBatteryDriver extends Driver {
+class HybridBatteryDriver extends Driver {
 
 	ipAddress;
 	deviceNr;
@@ -56,15 +56,14 @@ class InverterWithBatteryDriver extends Driver {
 
 						const primaryInverter = inverterInfo.getPrimaryInverter();
 
-						// Get the system name
-						const sid = primaryInverter.isn || randomUUID();
+						const isn = primaryInverter.isn || randomUUID();
 
-						this.homey.log('System name: ', primaryInverter.model, sid );
+						this.homey.log('System name: ', primaryInverter.model, isn );
 
 						devicesList.push({
-							name: `Solplanet (with Battery)`,
+							name: `${primaryInverter.model} Battery`,
 							data: {
-								sid: sid,
+								sid: `${isn}-battery`,
 							},
 							settings: {
 								ip_address: this.ipAddress,
@@ -82,4 +81,4 @@ class InverterWithBatteryDriver extends Driver {
 	}
 }
 
-module.exports = InverterWithBatteryDriver;
+module.exports = HybridBatteryDriver;
