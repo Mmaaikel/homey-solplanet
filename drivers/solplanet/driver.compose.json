@@ -52,13 +52,13 @@
 			}
 		},
 		"meter_power": {
+			"showInHomey": false,
 			"title": {
 				"en": "Production Lifetime (kWh)",
 				"nl": "Productie Totaal (kWh)"
 			}
 		},
 		"meter_power.total": {
-			"showInHomey": false,
 			"title": {
 				"en": "Production Lifetime (kWh)",
 				"nl": "Productie Totaal (kWh)"
