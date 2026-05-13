@@ -12,9 +12,6 @@ class SolPlanet extends Inverter {
 	async onInit() {
 		this.homey.log('SolPlanet has been initialized')
 
-		// Migrate capabilities for existing devices
-		await this.migrateCapabilities();
-
 		const settings = this.getSettings();
 		this.homey.log( 'Settings:', settings )
 
@@ -154,6 +151,7 @@ class SolPlanet extends Inverter {
 
 					if( totalProductionEnergy !== undefined ) {
 						this.setValueWithCatch("meter_power", totalProductionEnergy);
+						this.setValueWithCatch("meter_power.total", totalProductionEnergy);
 					}
 
 					// Daily (kWh) - etd field
@@ -236,15 +234,6 @@ class SolPlanet extends Inverter {
 		// Update the fail checks
 		this.checksFailed++;
 		this.homey.log(`Unavailable (${this.checksFailed}): ${errorMessage}`);
-	}
-
-	async migrateCapabilities() {
-		// Rename meter_power.total -> meter_power.today for existing devices
-		if( this.hasCapability('meter_power.total') ) {
-			this.homey.log('Migrating meter_power.total to meter_power.today');
-			await this.removeCapability('meter_power.total');
-			await this.addCapability('meter_power.today');
-		}
 	}
 }
 

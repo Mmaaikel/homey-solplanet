@@ -35,6 +35,7 @@
 		"measure_temperature",
 		"battery_soc",
 		"meter_power",
+		"meter_power.total",
 		"meter_power.today"
 	],
 	"capabilitiesOptions": {
@@ -51,6 +52,13 @@
 			}
 		},
 		"meter_power": {
+			"title": {
+				"en": "Production Lifetime (kWh)",
+				"nl": "Productie Totaal (kWh)"
+			}
+		},
+		"meter_power.total": {
+			"showInHomey": false,
 			"title": {
 				"en": "Production Lifetime (kWh)",
 				"nl": "Productie Totaal (kWh)"
