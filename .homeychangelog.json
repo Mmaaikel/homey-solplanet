@@ -52,5 +52,8 @@
   },
   "1.2.0": {
     "en": "Breaking change: Replaced 'Inverter with Battery' driver with two new drivers: 'Hybrid Inverter (Solar)' (solar panel class) and 'Hybrid Inverter (Battery)' (home battery class) for proper Homey Energy integration. Fixed standard SolPlanet driver energy configuration."
+  },
+  "1.2.1": {
+    "en": "Removed deviceNr from pairing, capability fixes"
   }
 }
