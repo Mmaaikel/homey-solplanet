@@ -40,16 +40,6 @@
 			value=""
 		/>
 		
-		<label class="homey-form-label" for="device_nr">Device number</label>
-		<input
-			class="homey-form-input"
-			type="text"
-			id="device_nr"
-			name="device_nr"
-			placeholder="2"
-			value="2"
-		/>
-		
 		<label class="homey-form-label" for="device_serial_number">Device serial number (can be found on your inverter)</label>
 		<input
 			class="homey-form-input"
@@ -75,11 +65,10 @@
 		Homey.showLoadingOverlay();
 
 		const ipAddress = document.getElementById("ip_address").value;
-		const deviceNr = document.getElementById("device_nr").value;
 		const deviceSerialNr = document.getElementById("device_serial_number").value;
 
 		try {
-			const result = await Homey.emit("validate", { ipAddress, deviceNr, deviceSerialNr });
+			const result = await Homey.emit("validate", { ipAddress, deviceSerialNr });
 			Homey.hideLoadingOverlay();
 
 			if (result && result.error) {

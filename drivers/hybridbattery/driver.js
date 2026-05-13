@@ -6,7 +6,6 @@ import SolPlanetClient from "../solplanet/library/SolPlanetClient";
 class HybridBatteryDriver extends Driver {
 
 	ipAddress;
-	deviceNr;
 	deviceSerialNr;
 
 	async onPair( session ) {

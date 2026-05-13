@@ -6,7 +6,6 @@ import SolPlanetClient from "./library/SolPlanetClient";
 class SolPlanetDriver extends Driver {
 	
 	ipAddress;
-	deviceNr;
 	deviceSerialNr;
 	
 	async onPair( session ) {
