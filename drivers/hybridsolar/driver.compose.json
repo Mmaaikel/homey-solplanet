@@ -1,7 +1,7 @@
 {
   "name": {
-    "en": "Hybrid Inverter (Solar)",
-    "nl": "Hybride Omvormer (Zonne-energie)"
+    "en": "Solar - Hybrid Inverter",
+    "nl": "Zonne-energie - Hybride Omvormer"
   },
   "images": {
     "large": "/drivers/hybridsolar/assets/images/large.jpg",

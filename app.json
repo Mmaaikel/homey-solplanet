@@ -29,8 +29,8 @@
   "drivers": [
     {
       "name": {
-        "en": "Hybrid Inverter (Battery)",
-        "nl": "Hybride Omvormer (Batterij)"
+        "en": "Battery - Hybrid Inverter",
+        "nl": "Batterij - Hybride Omvormer"
       },
       "images": {
         "large": "/drivers/hybridbattery/assets/images/large.jpg",
@@ -44,7 +44,9 @@
       ],
       "class": "battery",
       "energy": {
-        "homeBattery": true
+        "homeBattery": true,
+        "meterPowerImportedCapability": "meter_power.imported",
+        "meterPowerExportedCapability": "meter_power.exported"
       },
       "pair": [
         {
@@ -140,8 +142,8 @@
     },
     {
       "name": {
-        "en": "Hybrid Inverter (Solar)",
-        "nl": "Hybride Omvormer (Zonne-energie)"
+        "en": "Solar - Hybrid Inverter",
+        "nl": "Zonne-energie - Hybride Omvormer"
       },
       "images": {
         "large": "/drivers/hybridsolar/assets/images/large.jpg",
