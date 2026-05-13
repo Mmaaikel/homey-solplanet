@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(homey app run:*)",
+      "Bash(git checkout:*)",
+      "Bash(timeout 70 homey app run:*)",
+      "Bash(git push:*)",
+      "Bash(timeout 30 homey app run:*)",
+      "WebFetch(domain:192.168.20.92)",
+      "Bash(curl:*)",
+      "Bash(node -e:*)",
+      "Bash(cat:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(python -m json.tool:*)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:apps.developer.homey.app)",
+      "WebFetch(domain:community.homey.app)",
+      "Bash(ls:*)",
+      "Bash(npx homey app compose:*)",
+      "Bash(npx homey app validate:*)",
+      "Bash(npx homey:*)"
+    ]
+  }
+}

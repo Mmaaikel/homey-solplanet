@@ -1,0 +1,25 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Battery State of Charge",
+    "nl": "Batterij Laadtoestand",
+    "da": "Batteri Ladningstilstand"
+  },
+  "units": {
+    "en": "%"
+  },
+  "insights": true,
+  "desc": {
+    "en": "Battery state of charge in percent",
+    "nl": "Batterij laadtoestand in procent",
+    "da": "Batteri ladningstilstand i procent"
+  },
+  "chartType": "spline",
+  "decimals": 0,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/capabilities/battery_soc.svg",
+  "min": 0,
+  "max": 100
+}

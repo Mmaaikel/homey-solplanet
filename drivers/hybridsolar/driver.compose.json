@@ -1,0 +1,146 @@
+{
+  "name": {
+    "en": "Hybrid Inverter (Solar)",
+    "nl": "Hybride Omvormer (Zonne-energie)"
+  },
+  "images": {
+    "large": "/drivers/hybridsolar/assets/images/large.jpg",
+    "small": "/drivers/hybridsolar/assets/images/small.jpg"
+  },
+  "connectivity": [
+    "lan"
+  ],
+  "platforms": [
+    "local"
+  ],
+  "class": "solarpanel",
+  "energy": {
+    "meterPowerExportedCapability": "meter_power"
+  },
+  "pair": [
+    {
+      "id": "pair"
+    },
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_devices"
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ],
+  "capabilities": [
+    "measure_power",
+    "meter_power",
+    "measure_temperature",
+    "meter_power.solar_today",
+    "measure_power.grid",
+    "meter_power.grid_import_today",
+    "meter_power.grid_export_today",
+    "meter_power.grid_import_total",
+    "meter_power.grid_export_total"
+  ],
+  "capabilitiesOptions": {
+    "measure_power": {
+      "title": {
+        "en": "Solar Power (W)",
+        "nl": "Zonne-energie (W)"
+      }
+    },
+    "meter_power": {
+      "title": {
+        "en": "Solar Energy Lifetime (kWh)",
+        "nl": "Zonne-energie Totaal (kWh)"
+      }
+    },
+    "measure_temperature": {
+      "title": {
+        "en": "Inverter Temperature",
+        "nl": "Omvormer Temperatuur"
+      }
+    },
+    "meter_power.solar_today": {
+      "title": {
+        "en": "Solar Energy Today (kWh)",
+        "nl": "Zonne-energie Vandaag (kWh)"
+      }
+    },
+    "measure_power.grid": {
+      "title": {
+        "en": "Grid Power Now (W)",
+        "nl": "Netvermogen Nu (W)"
+      },
+      "insights": true
+    },
+    "meter_power.grid_import_today": {
+      "title": {
+        "en": "Grid Import Today (kWh)",
+        "nl": "Net Import Vandaag (kWh)"
+      }
+    },
+    "meter_power.grid_export_today": {
+      "title": {
+        "en": "Grid Export Today (kWh)",
+        "nl": "Net Export Vandaag (kWh)"
+      }
+    },
+    "meter_power.grid_import_total": {
+      "title": {
+        "en": "Grid Import Lifetime (kWh)",
+        "nl": "Net Import Totaal (kWh)"
+      }
+    },
+    "meter_power.grid_export_total": {
+      "title": {
+        "en": "Grid Export Lifetime (kWh)",
+        "nl": "Net Export Totaal (kWh)"
+      }
+    }
+  },
+  "settings": [
+    {
+      "id": "ip_address",
+      "type": "text",
+      "label": {
+        "en": "SolPlanet inverter IP address"
+      }
+    },
+    {
+      "id": "device_serial_number",
+      "type": "text",
+      "label": {
+        "en": "Device serial number (can be found at the online dashboard)"
+      }
+    },
+    {
+      "id": "interval",
+      "type": "number",
+      "value": 60,
+      "min": 5,
+      "max": 300,
+      "label": {
+        "en": "Fetch interval (in seconds)"
+      }
+    },
+    {
+      "id": "solplanet_model_label",
+      "type": "label",
+      "label": {
+        "en": "Model name"
+      },
+      "value": ""
+    },
+    {
+      "id": "solplanet_version_label",
+      "type": "label",
+      "label": {
+        "en": "Version"
+      },
+      "value": ""
+    }
+  ]
+}
