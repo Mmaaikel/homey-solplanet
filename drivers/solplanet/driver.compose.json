@@ -32,48 +32,40 @@
 	],
 	"capabilities": [
 		"measure_power",
-		"measure_temperature",
+		"meter_power.today",
 		"battery_soc",
-		"meter_power",
-		"meter_power.total",
-		"meter_power.today"
+		"measure_temperature",
+		"meter_power.total"
 	],
 	"capabilitiesOptions": {
-		"measure_temperature": {
-			"title": {
-				"en": "Inverter Temperature",
-				"nl": "Omvormer Temperatuur"
-			}
-		},
 		"measure_power": {
 			"title": {
-				"en": "AC Power Now (W)",
-				"nl": "AC Vermogen Nu (W)"
-			}
-		},
-		"meter_power": {
-			"showInHomey": false,
-			"title": {
-				"en": "Production Lifetime (kWh)",
-				"nl": "Productie Totaal (kWh)"
-			}
-		},
-		"meter_power.total": {
-			"title": {
-				"en": "Production Lifetime (kWh)",
-				"nl": "Productie Totaal (kWh)"
+				"en": "Solar Power (W)",
+				"nl": "Zonne-energie (W)"
 			}
 		},
 		"meter_power.today": {
 			"title": {
-				"en": "Production Today (kWh)",
-				"nl": "Productie Vandaag (kWh)"
+				"en": "Solar Energy Today (kWh)",
+				"nl": "Zonne-energie Vandaag (kWh)"
 			}
 		},
 		"battery_soc": {
 			"title": {
 				"en": "Battery Charge Level (%)",
 				"nl": "Batterij Laadniveau (%)"
+			}
+		},
+		"measure_temperature": {
+			"title": {
+				"en": "Inverter Temperature",
+				"nl": "Omvormer Temperatuur"
+			}
+		},
+		"meter_power.total": {
+			"title": {
+				"en": "Solar Energy Lifetime (kWh)",
+				"nl": "Zonne-energie Totaal (kWh)"
 			}
 		}
 	},
@@ -122,7 +114,7 @@
 		}
 	],
 	"energy": {
-		"meterPowerExportedCapability": "meter_power"
+		"meterPowerExportedCapability": "meter_power.today"
 	},
 	"homeyCommunityTopicId": null
 }

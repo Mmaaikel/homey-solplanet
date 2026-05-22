@@ -161,7 +161,7 @@ class HybridSolar extends Inverter {
 				this.homey.log( `Solar energy total is: ${ solarEnergyTotal }kWh` );
 
 				if( !isNaN(solarEnergyTotal) ) {
-					this.setValueWithCatch("meter_power", solarEnergyTotal);
+					this.setValueWithCatch("meter_power.total", solarEnergyTotal);
 				}
 
 				// Solar energy today (kWh) - etdpv field in 0.1 kWh

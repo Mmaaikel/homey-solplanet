@@ -35,7 +35,7 @@
   ],
   "capabilities": [
     "measure_power",
-    "meter_power",
+    "meter_power.total",
     "measure_temperature",
     "meter_power.solar_today",
     "measure_power.grid",
@@ -51,7 +51,7 @@
         "nl": "Zonne-energie (W)"
       }
     },
-    "meter_power": {
+    "meter_power.total": {
       "title": {
         "en": "Solar Energy Lifetime (kWh)",
         "nl": "Zonne-energie Totaal (kWh)"

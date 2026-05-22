@@ -36,6 +36,11 @@ class SolPlanet extends Inverter {
 				solplanet_version_label: primaryInverter.cmv,
 			})
 
+			if( this.hasCapability('meter_power') ) {
+				await this.removeCapability('meter_power');
+				this.homey.log("Removed meter_power capability");
+			}
+
 			// Check battery
 			if( primaryInverter.hasBatteryStorage() ) {
 				this.homey.log("Inverter has battery storage");
@@ -150,7 +155,6 @@ class SolPlanet extends Inverter {
 					this.homey.log( `Total production energy is: ${ totalProductionEnergy }kWh` );
 
 					if( totalProductionEnergy !== undefined ) {
-						this.setValueWithCatch("meter_power", totalProductionEnergy);
 						this.setValueWithCatch("meter_power.total", totalProductionEnergy);
 					}
 
