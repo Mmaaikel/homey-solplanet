@@ -58,5 +58,8 @@
   },
   "1.2.2": {
     "en": "Internal restructure, update meter_power to meter_power.total"
+  },
+  "1.2.4": {
+    "en": "Extra logging"
   }
 }
