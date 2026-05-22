@@ -36,6 +36,9 @@ class SolPlanet extends Inverter {
 				solplanet_version_label: primaryInverter.cmv,
 			})
 
+			const list = this.getCapabilities()
+			this.homey.log("Current capabilities: ", list );
+
 			if( !this.hasCapability('meter_power.total') ) {
 				await this.addCapability('meter_power.total');
 				this.homey.log("Added meter_power.total capability");
@@ -155,20 +158,20 @@ class SolPlanet extends Inverter {
 						this.setValueWithCatch("measure_power", currentProductionPower);
 					}
 
-					// Total (kWh) - eto field (cumulative, used by Homey Energy)
-					const totalProductionEnergy = Math.abs( Number( _.parseInt( primaryInverter.eto ) / 10 ) );
-					this.homey.log( `Total production energy is: ${ totalProductionEnergy }kWh` );
-
-					if( totalProductionEnergy !== undefined ) {
-						this.setValueWithCatch("meter_power.total", totalProductionEnergy);
-					}
-
 					// Daily (kWh) - etd field
 					const dailyProductionEnergy = Math.abs( Number( _.parseInt( primaryInverter.etd ) / 10 ) );
 					this.homey.log( `Daily production energy is: ${ dailyProductionEnergy }kWh` );
 
 					if( dailyProductionEnergy !== undefined ) {
 						this.setValueWithCatch("meter_power.today", dailyProductionEnergy);
+					}
+
+					// Total (kWh) - eto field (cumulative, used by Homey Energy)
+					const totalProductionEnergy = Math.abs( Number( _.parseInt( primaryInverter.eto ) / 10 ) );
+					this.homey.log( `Total production energy is: ${ totalProductionEnergy }kWh` );
+
+					if( totalProductionEnergy !== undefined ) {
+						this.setValueWithCatch("meter_power.total", totalProductionEnergy);
 					}
 
 					// Check if there is a battery
@@ -206,7 +209,7 @@ class SolPlanet extends Inverter {
 
 				if( now > midnight && now < threeAm ) {
 					// Only reset daily production, not the cumulative meter_power
-					this.setCapabilityValue( "meter_power.today", 0 ).catch( this.onError.bind( this ) );
+					this.setValueWithCatch( 'meter_power.today', 0 );
 				}
 
 				if( this.checksFailed > 3 ) {
@@ -226,6 +229,7 @@ class SolPlanet extends Inverter {
 	}
 
 	setValueWithCatch( capabilityId, value ) {
+		this.homey.log(`Setting capability ${capabilityId} to value ${value}` );
 		this.setCapabilityValue( capabilityId, value ).catch( this.onError.bind( this ) );
 	}
 
