@@ -1,6 +1,6 @@
-import { Inverter } from "../../inverter";
-import SolPlanetApi from "./library/SolPlanetApi.js";
-import SolPlanetClient from "./library/SolPlanetClient.js";
+import { Inverter } from "../../lib/inverter.js";
+import SolPlanetApi from "../../lib/SolPlanetApi.js";
+import SolPlanetClient from "../../lib/SolPlanetClient.js";
 import _ from 'lodash'
 
 class SolPlanet extends Inverter {
@@ -35,6 +35,11 @@ class SolPlanet extends Inverter {
 				solplanet_model_label: primaryInverter.model,
 				solplanet_version_label: primaryInverter.cmv,
 			})
+
+			if( !this.hasCapability('meter_power.total') ) {
+				await this.addCapability('meter_power.total');
+				this.homey.log("Added meter_power.total capability");
+			}
 
 			if( this.hasCapability('meter_power') ) {
 				await this.removeCapability('meter_power');
@@ -241,4 +246,4 @@ class SolPlanet extends Inverter {
 	}
 }
 
-module.exports = SolPlanet;
+export default SolPlanet

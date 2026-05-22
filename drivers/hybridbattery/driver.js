@@ -1,9 +1,9 @@
-import { Driver } from "homey";
+import Homey from 'homey';
 import { randomUUID } from 'node:crypto'
-import SolPlanetApi from '../solplanet/library/SolPlanetApi';
-import SolPlanetClient from "../solplanet/library/SolPlanetClient";
+import SolPlanetApi from '../../lib/SolPlanetApi.js';
+import SolPlanetClient from "../../lib/SolPlanetClient.js";
 
-class HybridBatteryDriver extends Driver {
+class HybridBatteryDriver extends Homey.Driver {
 
 	ipAddress;
 	deviceSerialNr;
@@ -80,4 +80,4 @@ class HybridBatteryDriver extends Driver {
 	}
 }
 
-module.exports = HybridBatteryDriver;
+export default HybridBatteryDriver;

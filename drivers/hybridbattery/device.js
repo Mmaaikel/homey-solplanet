@@ -1,6 +1,6 @@
-import { Inverter } from "../../inverter";
-import SolPlanetApi from "../solplanet/library/SolPlanetApi.js";
-import SolPlanetClient from "../solplanet/library/SolPlanetClient.js";
+import { Inverter } from "../../lib/inverter.js";
+import SolPlanetApi from "../../lib/SolPlanetApi.js";
+import SolPlanetClient from "../../lib/SolPlanetClient.js";
 import _ from 'lodash'
 
 class HybridBattery extends Inverter {
@@ -172,4 +172,4 @@ class HybridBattery extends Inverter {
 	}
 }
 
-module.exports = HybridBattery;
+export default HybridBattery;
