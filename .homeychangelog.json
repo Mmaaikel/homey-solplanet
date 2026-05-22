@@ -55,5 +55,8 @@
   },
   "1.2.1": {
     "en": "Removed deviceNr from pairing, capability fixes"
+  },
+  "1.2.2": {
+    "en": "Internal restructure, update meter_power to meter_power.total"
   }
 }
