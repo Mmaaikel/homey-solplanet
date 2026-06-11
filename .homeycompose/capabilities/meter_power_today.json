@@ -1,0 +1,15 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Solar Energy Today",
+    "nl": "Zonne-energie Vandaag"
+  },
+  "units": {
+    "en": "kWh"
+  },
+  "icon": "/assets/capabilities/solar_today.svg",
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true
+}

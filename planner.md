@@ -250,10 +250,10 @@ const onConnect = async (event) => {
 **File:** `drivers/solplanet/driver.compose.json`
 
 ```json
-"meter_power": {
+"meter_power_today": {
     "title": { "en": "Energy (today)", "nl": "Energie (vandaag)" }
 },
-"meter_power.total": {
+"meter_power": {
     "title": { "en": "Energy Total", "nl": "Energie Totaal" }
 }
 ```

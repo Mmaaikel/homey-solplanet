@@ -35,6 +35,25 @@ class HybridSolar extends Inverter {
 				solplanet_model_label: primaryInverter.model,
 				solplanet_version_label: primaryInverter.cmv,
 			})
+
+			const list = this.getCapabilities()
+			this.homey.log("Current capabilities: ", list );
+
+			const createCapabilities = ['meter_power'];
+			for( const capabilityId of createCapabilities ) {
+				if( !this.hasCapability(capabilityId) ) {
+					await this.addCapability(capabilityId);
+					this.homey.log(`Added ${capabilityId} capability`);
+				}
+			}
+
+			const removeCapabilities = ['meter_power.total'];
+			for( const capabilityId of removeCapabilities ) {
+				if( this.hasCapability(capabilityId) ) {
+					await this.removeCapability(capabilityId);
+					this.homey.log(`Removed ${capabilityId} capability`);
+				}
+			}
 		}
 	}
 
@@ -161,7 +180,7 @@ class HybridSolar extends Inverter {
 				this.homey.log( `Solar energy total is: ${ solarEnergyTotal }kWh` );
 
 				if( !isNaN(solarEnergyTotal) ) {
-					this.setValueWithCatch("meter_power.total", solarEnergyTotal);
+					this.setValueWithCatch("meter_power", solarEnergyTotal);
 				}
 
 				// Solar energy today (kWh) - etdpv field in 0.1 kWh

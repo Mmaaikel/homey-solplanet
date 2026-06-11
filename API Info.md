@@ -21,7 +21,7 @@ Data retrieved via `getInverterData()` and `getInverterInfo()`.
 | `flg` | Device state flag. `0` = offline, `1` = running | - | - | State check | - | - |
 | `tmp` | Inverter internal temperature | 10 | °C | `measure_temperature` | - | - |
 | `pac` | Inverter AC power output (includes battery discharge for hybrid) | 1 | W | `measure_power` | - | - |
-| `etd` | AC energy today (includes battery discharge for hybrid) | 10 | kWh | `meter_power.today` | - | - |
+| `etd` | AC energy today (includes battery discharge for hybrid) | 10 | kWh | `meter_power_today` | - | - |
 | `eto` | AC energy total (cumulative lifetime) | 10 | kWh | `meter_power` | - | - |
 | `model` | Inverter model name (e.g., "ASW5000-S") | - | - | Settings label | Settings label | Settings label |
 | `cmv` | Communication module version / firmware version | - | - | Settings label | Settings label | - |

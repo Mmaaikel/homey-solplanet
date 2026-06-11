@@ -27,6 +27,7 @@ class SolPlanet extends Inverter {
 
 		// Set some info labels
 		const inverterInfo = await this.api.getInverterInfo();
+		this.homey.log('Inverter info fetched', inverterInfo );
 		if( inverterInfo !== null ) {
 
 			const primaryInverter = inverterInfo.getPrimaryInverter();
@@ -39,14 +40,20 @@ class SolPlanet extends Inverter {
 			const list = this.getCapabilities()
 			this.homey.log("Current capabilities: ", list );
 
-			if( !this.hasCapability('meter_power.total') ) {
-				await this.addCapability('meter_power.total');
-				this.homey.log("Added meter_power.total capability");
+			const createCapabilities = ['meter_power', 'meter_power_today'];
+			for( const capabilityId of createCapabilities ) {
+				if( !this.hasCapability(capabilityId) ) {
+					await this.addCapability(capabilityId);
+					this.homey.log(`Added ${capabilityId} capability`);
+				}
 			}
 
-			if( this.hasCapability('meter_power') ) {
-				await this.removeCapability('meter_power');
-				this.homey.log("Removed meter_power capability");
+			const removeCapabilities = ['meter_power.total', 'meter_power.today'];
+			for( const capabilityId of removeCapabilities ) {
+				if( this.hasCapability(capabilityId) ) {
+					await this.removeCapability(capabilityId);
+					this.homey.log(`Removed ${capabilityId} capability`);
+				}
 			}
 
 			// Check battery
@@ -163,7 +170,7 @@ class SolPlanet extends Inverter {
 					this.homey.log( `Daily production energy is: ${ dailyProductionEnergy }kWh` );
 
 					if( dailyProductionEnergy !== undefined ) {
-						this.setValueWithCatch("meter_power.today", dailyProductionEnergy);
+						this.setValueWithCatch("meter_power_today", dailyProductionEnergy);
 					}
 
 					// Total (kWh) - eto field (cumulative, used by Homey Energy)
@@ -171,7 +178,7 @@ class SolPlanet extends Inverter {
 					this.homey.log( `Total production energy is: ${ totalProductionEnergy }kWh` );
 
 					if( totalProductionEnergy !== undefined ) {
-						this.setValueWithCatch("meter_power.total", totalProductionEnergy);
+						this.setValueWithCatch("meter_power", totalProductionEnergy);
 					}
 
 					// Check if there is a battery
@@ -209,7 +216,7 @@ class SolPlanet extends Inverter {
 
 				if( now > midnight && now < threeAm ) {
 					// Only reset daily production, not the cumulative meter_power
-					this.setValueWithCatch( 'meter_power.today', 0 );
+					this.setValueWithCatch( 'meter_power_today', 0 );
 				}
 
 				if( this.checksFailed > 3 ) {
