@@ -61,5 +61,8 @@
   },
   "1.2.4": {
     "en": "Extra logging"
+  },
+  "1.2.5": {
+    "en": "Change capability names and updated migration"
   }
 }
