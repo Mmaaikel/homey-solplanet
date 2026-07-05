@@ -5,6 +5,7 @@ import _ from 'lodash'
 
 class SolPlanet extends Inverter {
 
+	fetchFailed = 0;
 	checksFailed = 0;
 	interval = 60;
 	api;
@@ -74,6 +75,20 @@ class SolPlanet extends Inverter {
 				this.homey.log("Inverter does not have battery storage");
 			}
 		}
+
+		// Conditions
+		// Register the condition card for checking if the window is open
+		const batteryAboveCondition = this.homey.flow.getConditionCard('sol_battery_above');
+		batteryAboveCondition?.registerRunListener(async (args, state) => {
+			const battery = this.getCapabilityValue('battery_soc');
+
+			return battery >= args.percentage;
+		});
+
+		const isOnlineCondition = this.homey.flow.getConditionCard('is_online');
+		isOnlineCondition?.registerRunListener(async () => {
+			return this.isOnline;
+		});
 	}
 
 	setDefaultInterval() {
@@ -120,9 +135,9 @@ class SolPlanet extends Inverter {
 
 		if( this.api ) {
 			try {
-
 				const inverterInfo = await this.api.getInverterInfo();
 				if( inverterInfo !== null ) {
+					this.fetchFailed = 0;
 
 					// Setting?
 					const primaryInverter = inverterInfo.getPrimaryInverter();
@@ -194,30 +209,33 @@ class SolPlanet extends Inverter {
 							this.homey.log( `Battery percentage is: ${ batteryPower }%` );
 
 							if( batteryPower !== undefined ) {
-								this.setValueWithCatch("battery_soc", batteryPower);
+								const resultBatterySoc = this.setValueWithCatch("battery_soc", batteryPower);
+
+								if( resultBatterySoc?.isChanged ) {
+									this._triggerFlowCard('sol_battery_percentage_changed', { battery_percentage: batteryPower });
+								}
 							}
 						}
 					}
 
 					this.setAvailable().catch( this.onError.bind( this ) );
+				} else {
+
+					this.fetchFailed++;
+
+					// Could not fetch the inverter info, maybe the device is offline. Set the device to unavailable
+					// Offline!
+					if( this.fetchFailed > 3 ) {
+						this.log("Could not fetch the inverter info. Set the device to unavailable");
+						this.setIsOffline();
+					}
 				}
 			} catch (err) {
 				// Log the error
 				this.onError( err );
 
-				// Check if it is later than midnight
-				const now = new Date();
-				const midnight = new Date();
-				midnight.setHours(0,0,0,0);
-
-				// And before 3 AM
-				const threeAm = new Date();
-				threeAm.setHours(3,0,0,0);
-
-				if( now > midnight && now < threeAm ) {
-					// Only reset daily production, not the cumulative meter_power
-					this.setValueWithCatch( 'meter_power_today', 0 );
-				}
+				// Offline!
+				this.setIsOffline();
 
 				if( this.checksFailed > 3 ) {
 					// Change the interval to 5 minutes
@@ -232,6 +250,23 @@ class SolPlanet extends Inverter {
 			await this.setUnavailable(
 				"SolPlanet could not be discovered on your network"
 			);
+		}
+	}
+
+	setIsOffline() {
+
+		// Check if it is later than midnight
+		const now = new Date();
+		const midnight = new Date();
+		midnight.setHours(0,0,0,0);
+
+		// And before 3 AM
+		const threeAm = new Date();
+		threeAm.setHours(3,0,0,0);
+
+		if( now > midnight && now < threeAm ) {
+			// Only reset daily production, not the cumulative meter_power
+			this.setValueWithCatch( 'meter_power_today', 0 );
 		}
 	}
 

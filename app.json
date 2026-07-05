@@ -27,6 +27,103 @@
   },
   "homeyCommunityTopicId": 105742,
   "esm": true,
+  "flow": {
+    "triggers": [
+      {
+        "id": "battery_percentage_changed",
+        "title": {
+          "en": "Battery percentage changed"
+        },
+        "hint": {
+          "en": "Triggered when the battery percentage changes"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=hybridbattery"
+          }
+        ],
+        "titleFormatted": {
+          "en": "Battery percentage changed"
+        }
+      },
+      {
+        "id": "sol_battery_percentage_changed",
+        "title": {
+          "en": "Battery percentage changed"
+        },
+        "hint": {
+          "en": "Triggered when the battery percentage changes"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=solplanet"
+          }
+        ],
+        "titleFormatted": {
+          "en": "Battery percentage changed"
+        }
+      }
+    ],
+    "conditions": [
+      {
+        "id": "battery_above",
+        "title": {
+          "en": "Battery is above [[percentage]]%"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=hybridbattery"
+          },
+          {
+            "type": "number",
+            "name": "percentage",
+            "title": {
+              "en": "Percentage"
+            }
+          }
+        ]
+      },
+      {
+        "id": "sol_battery_above",
+        "title": {
+          "en": "Battery is above [[percentage]]%"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=solplanet"
+          },
+          {
+            "type": "number",
+            "name": "percentage",
+            "title": {
+              "en": "Percentage"
+            }
+          }
+        ]
+      },
+      {
+        "id": "is_online",
+        "title": {
+          "en": "Device is online"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=solplanet"
+          }
+        ]
+      }
+    ]
+  },
   "drivers": [
     {
       "name": {
@@ -135,14 +232,6 @@
           "type": "label",
           "label": {
             "en": "Battery model"
-          },
-          "value": ""
-        },
-        {
-          "id": "solplanet_battery_info_capacity",
-          "type": "label",
-          "label": {
-            "en": "Battery capacity"
           },
           "value": ""
         }
