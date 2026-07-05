@@ -246,10 +246,6 @@ class HybridSolar extends Inverter {
 		}
 	}
 
-	setValueWithCatch( capabilityId, value ) {
-		this.setCapabilityValue( capabilityId, value ).catch( this.onError.bind( this ) );
-	}
-
 	onError (error) {
 		const errorMessage = error.message;
 

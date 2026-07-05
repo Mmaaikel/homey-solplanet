@@ -137,6 +137,14 @@
             "en": "Battery model"
           },
           "value": ""
+        },
+        {
+          "id": "solplanet_battery_info_capacity",
+          "type": "label",
+          "label": {
+            "en": "Battery capacity"
+          },
+          "value": ""
         }
       ],
       "id": "hybridbattery"

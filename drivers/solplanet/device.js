@@ -235,11 +235,6 @@ class SolPlanet extends Inverter {
 		}
 	}
 
-	setValueWithCatch( capabilityId, value ) {
-		this.homey.log(`Setting capability ${capabilityId} to value ${value}` );
-		this.setCapabilityValue( capabilityId, value ).catch( this.onError.bind( this ) );
-	}
-
 	onError (error) {
 		const errorMessage = error.message;
 

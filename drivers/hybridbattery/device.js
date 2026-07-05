@@ -43,9 +43,24 @@ class HybridBattery extends Inverter {
 					this.setSettings({
 						solplanet_battery_model_label: batteryInfo.battery?.manufactoty ?? 'Unknown',
 					})
+
+					const batteryInfoCapacity = batteryInfo.battery?.capacity ?? 'Unknown';
+					this.setSettings({
+						solplanet_battery_info_capacity: batteryInfoCapacity,
+					});
 				}
 			}
 		}
+
+		// Conditions
+		// Register the condition card for checking if the window is open
+		const batteryAboveCondition = this.homey.flow.getConditionCard('battery_above');
+
+		batteryAboveCondition?.registerRunListener(async (args, state) => {
+			const battery = this.getCapabilityValue('battery_soc');
+
+			return battery >= args.percentage;
+		});
 	}
 
 	setDefaultInterval() {
@@ -116,7 +131,11 @@ class HybridBattery extends Inverter {
 					this.homey.log( `Battery SOC is: ${ batterySoc }%` );
 
 					if( !isNaN(batterySoc) ) {
-						this.setValueWithCatch("battery_soc", batterySoc);
+						const resultBatterySoc = this.setValueWithCatch("battery_soc", batterySoc);
+
+						if( resultBatterySoc?.isChanged ) {
+							this._triggerFlowCard('battery_percentage_changed', { battery_percentage: batterySoc });
+						}
 					}
 
 					// Battery charge today (kWh) - ebi is in 0.1 kWh
@@ -124,7 +143,7 @@ class HybridBattery extends Inverter {
 					this.homey.log( `Battery charge today is: ${ batteryChargeToday }kWh` );
 
 					if( !isNaN(batteryChargeToday) ) {
-						this.setValueWithCatch("meter_power.battery_charge_today", batteryChargeToday);
+						const resultBatteryChargeToday = this.setValueWithCatch("meter_power.battery_charge_today", batteryChargeToday);
 					}
 
 					// Battery discharge today (kWh) - ebo is in 0.1 kWh
@@ -152,10 +171,6 @@ class HybridBattery extends Inverter {
 				"SolPlanet could not be discovered on your network"
 			);
 		}
-	}
-
-	setValueWithCatch( capabilityId, value ) {
-		this.setCapabilityValue( capabilityId, value ).catch( this.onError.bind( this ) );
 	}
 
 	onError (error) {

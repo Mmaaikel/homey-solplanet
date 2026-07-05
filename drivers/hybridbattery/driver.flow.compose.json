@@ -1,0 +1,35 @@
+{
+  "triggers": [
+    {
+      "id": "battery_percentage_changed",
+      "title": {
+        "en": "Battery percentage changed"
+      },
+      "hint": {
+        "en": "Triggered when the battery percentage changes"
+      },
+      "args": [],
+      "titleFormatted": {
+        "en": "Battery percentage changed"
+      }
+    }
+  ],
+  "conditions": [
+    {
+      "id": "battery_above",
+      "title": {
+        "en": "Battery is above [[percentage]]%"
+      },
+      "args": [
+        {
+          "type": "number",
+          "name": "percentage",
+          "title": {
+            "en": "Percentage"
+          }
+        }
+      ]
+    }
+  ],
+  "actions": []
+}
