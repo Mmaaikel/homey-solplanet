@@ -398,8 +398,8 @@
     },
     {
       "name": {
-        "en": "SolPlanet",
-        "nl": "SolPlanet"
+        "en": "Solar - Standard Inverter",
+        "nl": "Zonne-energie - Standaard Omvormer"
       },
       "images": {
         "large": "/drivers/solplanet/assets/images/large.jpg",
