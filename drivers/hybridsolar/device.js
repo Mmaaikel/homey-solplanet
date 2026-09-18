@@ -126,14 +126,7 @@ class HybridSolar extends Inverter {
 			} catch (err) {
 				this.onError( err );
 
-				const now = new Date();
-				const midnight = new Date();
-				midnight.setHours(0,0,0,0);
-
-				const threeAm = new Date();
-				threeAm.setHours(3,0,0,0);
-
-				if( now > midnight && now < threeAm ) {
+				if( await this.isHomeyLocalHourBetween(0, 3) ) {
 					this.setCapabilityValue( "meter_power.solar_today", 0 ).catch( this.onError.bind( this ) );
 					this.setCapabilityValue( "meter_power.grid_import_today", 0 ).catch( this.onError.bind( this ) );
 					this.setCapabilityValue( "meter_power.grid_export_today", 0 ).catch( this.onError.bind( this ) );

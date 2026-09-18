@@ -227,7 +227,7 @@ class SolPlanet extends Inverter {
 					// Offline!
 					if( this.fetchFailed > 3 ) {
 						this.log("Could not fetch the inverter info. Set the device to unavailable");
-						this.setIsOffline();
+						await this.setIsOffline();
 					}
 				}
 			} catch (err) {
@@ -235,7 +235,7 @@ class SolPlanet extends Inverter {
 				this.onError( err );
 
 				// Offline!
-				this.setIsOffline();
+				await this.setIsOffline();
 
 				if( this.checksFailed > 3 ) {
 					// Change the interval to 5 minutes
@@ -253,18 +253,8 @@ class SolPlanet extends Inverter {
 		}
 	}
 
-	setIsOffline() {
-
-		// Check if it is later than midnight
-		const now = new Date();
-		const midnight = new Date();
-		midnight.setHours(0,0,0,0);
-
-		// And before 3 AM
-		const threeAm = new Date();
-		threeAm.setHours(3,0,0,0);
-
-		if( now > midnight && now < threeAm ) {
+	async setIsOffline() {
+		if( await this.isHomeyLocalHourBetween(0, 3) ) {
 			// Only reset daily production, not the cumulative meter_power
 			this.setValueWithCatch( 'meter_power_today', 0 );
 		}
