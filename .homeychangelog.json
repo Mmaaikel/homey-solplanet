@@ -70,5 +70,11 @@
   },
   "1.3.1": {
     "en": "Allow full URL instead of only the IP"
+  },
+  "1.3.2": {
+    "en": "Allow insecure https connections"
+  },
+  "1.3.3": {
+    "en": "Allow self-signed https certificates"
   }
 }
