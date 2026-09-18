@@ -75,7 +75,7 @@
 			"id": "ip_address",
 			"type": "text",
 			"label": {
-				"en": "SolPlanet inverter IP address"
+				"en": "SolPlanet inverter IP address or URL"
 			}
 		},
 		{

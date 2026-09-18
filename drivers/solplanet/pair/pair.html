@@ -30,13 +30,13 @@
 	<h1 class="homey-title">Please enter your details</h1>
 	
 	<div class="homey-form-group">
-		<label class="homey-form-label" for="ip_address">Inverter IP address</label>
+		<label class="homey-form-label" for="ip_address">Inverter IP address or URL</label>
 		<input
 			class="homey-form-input"
 			type="text"
 			id="ip_address"
 			name="ip_address"
-			placeholder="192.168.1.20"
+			placeholder="192.168.1.20 or https://192.168.1.20:8484"
 			value=""
 		/>
 		
@@ -64,8 +64,8 @@
 		event.preventDefault();
 		Homey.showLoadingOverlay();
 
-		const ipAddress = document.getElementById("ip_address").value;
-		const deviceSerialNr = document.getElementById("device_serial_number").value;
+		const ipAddress = document.getElementById("ip_address").value.trim();
+		const deviceSerialNr = document.getElementById("device_serial_number").value.trim();
 
 		try {
 			const result = await Homey.emit("validate", { ipAddress, deviceSerialNr });
