@@ -122,7 +122,7 @@ class HybridBattery extends Inverter {
 					const batteryPower = Number( _.parseInt( batteryData.pb ) );
 					this.homey.log( `Battery power is: ${ batteryPower }W` );
 
-					if( !isNaN(batteryPower) ) {
+					if( Number.isFinite(batteryPower) ) {
 						this.setValueWithCatch("measure_power", batteryPower);
 					}
 
@@ -130,7 +130,7 @@ class HybridBattery extends Inverter {
 					const batterySoc = Number( _.parseInt( batteryData.soc ) );
 					this.homey.log( `Battery SOC is: ${ batterySoc }%` );
 
-					if( !isNaN(batterySoc) ) {
+					if( Number.isFinite(batterySoc) ) {
 						const resultBatterySoc = this.setValueWithCatch("battery_soc", batterySoc);
 
 						if( resultBatterySoc?.isChanged ) {
@@ -142,7 +142,7 @@ class HybridBattery extends Inverter {
 					const batteryChargeToday = Math.abs( Number( _.parseInt( batteryData.ebi ) / 10 ) );
 					this.homey.log( `Battery charge today is: ${ batteryChargeToday }kWh` );
 
-					if( !isNaN(batteryChargeToday) ) {
+					if( Number.isFinite(batteryChargeToday) ) {
 						const resultBatteryChargeToday = this.setValueWithCatch("meter_power.battery_charge_today", batteryChargeToday);
 					}
 
@@ -150,7 +150,7 @@ class HybridBattery extends Inverter {
 					const batteryDischargeToday = Math.abs( Number( _.parseInt( batteryData.ebo ) / 10 ) );
 					this.homey.log( `Battery discharge today is: ${ batteryDischargeToday }kWh` );
 
-					if( !isNaN(batteryDischargeToday) ) {
+					if( Number.isFinite(batteryDischargeToday) ) {
 						this.setValueWithCatch("meter_power.battery_discharge_today", batteryDischargeToday);
 					}
 

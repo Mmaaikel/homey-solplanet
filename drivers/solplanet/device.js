@@ -167,7 +167,7 @@ class SolPlanet extends Inverter {
 					const currentTemperature = Number( _.parseInt( inverterData.tmp ) / 10 );
 					this.homey.log( `Current inverter temperature is: ${ currentTemperature }` );
 
-					if( currentTemperature !== undefined ) {
+					if( Number.isFinite(currentTemperature) ) {
 						this.setValueWithCatch("measure_temperature", currentTemperature);
 					}
 
@@ -176,7 +176,7 @@ class SolPlanet extends Inverter {
 					this.homey.log( `Current production power is: ${ currentProductionPower }W` );
 
 					// Ignore when the current production power is more than 20k?
-					if( currentProductionPower !== undefined && currentProductionPower <= 20000 ) {
+					if( Number.isFinite(currentProductionPower) && currentProductionPower <= 20000 ) {
 						this.setValueWithCatch("measure_power", currentProductionPower);
 					}
 
@@ -184,7 +184,7 @@ class SolPlanet extends Inverter {
 					const dailyProductionEnergy = Math.abs( Number( _.parseInt( primaryInverter.etd ) / 10 ) );
 					this.homey.log( `Daily production energy is: ${ dailyProductionEnergy }kWh` );
 
-					if( dailyProductionEnergy !== undefined ) {
+					if( Number.isFinite(dailyProductionEnergy) ) {
 						this.setValueWithCatch("meter_power_today", dailyProductionEnergy);
 					}
 
@@ -192,7 +192,7 @@ class SolPlanet extends Inverter {
 					const totalProductionEnergy = Math.abs( Number( _.parseInt( primaryInverter.eto ) / 10 ) );
 					this.homey.log( `Total production energy is: ${ totalProductionEnergy }kWh` );
 
-					if( totalProductionEnergy !== undefined ) {
+					if( Number.isFinite(totalProductionEnergy) ) {
 						this.setValueWithCatch("meter_power", totalProductionEnergy);
 					}
 
@@ -208,7 +208,7 @@ class SolPlanet extends Inverter {
 							const batteryPower = Number( _.parseInt( batteryData.soc ) );
 							this.homey.log( `Battery percentage is: ${ batteryPower }%` );
 
-							if( batteryPower !== undefined ) {
+							if( Number.isFinite(batteryPower) ) {
 								const resultBatterySoc = this.setValueWithCatch("battery_soc", batteryPower);
 
 								if( resultBatterySoc?.isChanged ) {

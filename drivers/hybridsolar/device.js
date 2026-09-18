@@ -163,7 +163,7 @@ class HybridSolar extends Inverter {
 				const temperature = Number( _.parseInt( batteryData.tb ) / 10 );
 				this.homey.log( `Temperature is: ${ temperature }C` );
 
-				if( !isNaN(temperature) ) {
+				if( Number.isFinite(temperature) ) {
 					this.setValueWithCatch("measure_temperature", temperature);
 				}
 
@@ -171,7 +171,7 @@ class HybridSolar extends Inverter {
 				const solarPower = Number( _.parseInt( batteryData.ppv ) );
 				this.homey.log( `Solar PV power is: ${ solarPower }W` );
 
-				if( !isNaN(solarPower) && solarPower <= 20000 ) {
+				if( Number.isFinite(solarPower) && solarPower <= 20000 ) {
 					this.setValueWithCatch("measure_power", solarPower);
 				}
 
@@ -179,7 +179,7 @@ class HybridSolar extends Inverter {
 				const solarEnergyTotal = Math.abs( Number( _.parseInt( batteryData.etopv ) / 10 ) );
 				this.homey.log( `Solar energy total is: ${ solarEnergyTotal }kWh` );
 
-				if( !isNaN(solarEnergyTotal) ) {
+				if( Number.isFinite(solarEnergyTotal) ) {
 					this.setValueWithCatch("meter_power", solarEnergyTotal);
 				}
 
@@ -187,7 +187,7 @@ class HybridSolar extends Inverter {
 				const solarEnergyToday = Math.abs( Number( _.parseInt( batteryData.etdpv ) / 10 ) );
 				this.homey.log( `Solar energy today is: ${ solarEnergyToday }kWh` );
 
-				if( !isNaN(solarEnergyToday) ) {
+				if( Number.isFinite(solarEnergyToday) ) {
 					this.setValueWithCatch("meter_power.solar_today", solarEnergyToday);
 				}
 			}
@@ -205,7 +205,7 @@ class HybridSolar extends Inverter {
 				const gridPower = Number( _.parseInt( meterData.pac ) );
 				this.homey.log( `Grid power is: ${ gridPower }W` );
 
-				if( !isNaN(gridPower) ) {
+				if( Number.isFinite(gridPower) ) {
 					this.setValueWithCatch("measure_power.grid", gridPower);
 				}
 
@@ -213,7 +213,7 @@ class HybridSolar extends Inverter {
 				const gridImportToday = Math.abs( Number( _.parseInt( meterData.itd ) / 100 ) );
 				this.homey.log( `Grid import today is: ${ gridImportToday }kWh` );
 
-				if( !isNaN(gridImportToday) ) {
+				if( Number.isFinite(gridImportToday) ) {
 					this.setValueWithCatch("meter_power.grid_import_today", gridImportToday);
 				}
 
@@ -221,7 +221,7 @@ class HybridSolar extends Inverter {
 				const gridExportToday = Math.abs( Number( _.parseInt( meterData.otd ) / 100 ) );
 				this.homey.log( `Grid export today is: ${ gridExportToday }kWh` );
 
-				if( !isNaN(gridExportToday) ) {
+				if( Number.isFinite(gridExportToday) ) {
 					this.setValueWithCatch("meter_power.grid_export_today", gridExportToday);
 				}
 
@@ -229,7 +229,7 @@ class HybridSolar extends Inverter {
 				const gridImportTotal = Math.abs( Number( _.parseInt( meterData.iet ) / 10 ) );
 				this.homey.log( `Grid import total is: ${ gridImportTotal }kWh` );
 
-				if( !isNaN(gridImportTotal) ) {
+				if( Number.isFinite(gridImportTotal) ) {
 					this.setValueWithCatch("meter_power.grid_import_total", gridImportTotal);
 				}
 
@@ -237,7 +237,7 @@ class HybridSolar extends Inverter {
 				const gridExportTotal = Math.abs( Number( _.parseInt( meterData.oet ) / 10 ) );
 				this.homey.log( `Grid export total is: ${ gridExportTotal }kWh` );
 
-				if( !isNaN(gridExportTotal) ) {
+				if( Number.isFinite(gridExportTotal) ) {
 					this.setValueWithCatch("meter_power.grid_export_total", gridExportTotal);
 				}
 			}
