@@ -10,13 +10,12 @@ class HybridBatteryDriver extends Homey.Driver {
 
 	async onPair( session ) {
 
-		session.setHandler("validate", async ({ ipAddress, deviceSerialNr } = {}) => {
+		session.setHandler("validate", async ({ ipAddress } = {}) => {
 			this.homey.log("Pair data received" );
 			this.homey.log("IP Address", ipAddress );
-			this.homey.log("Device Serial Nr", deviceSerialNr );
 
 			this.ipAddress = ipAddress ?? '';
-			this.deviceSerialNr = deviceSerialNr ?? '';
+			this.deviceSerialNr = '';
 
 			const solPlanetClient = new SolPlanetClient( this.ipAddress, this.deviceSerialNr );
 			const solPlanetApi = new SolPlanetApi( solPlanetClient );
@@ -30,13 +29,23 @@ class HybridBatteryDriver extends Homey.Driver {
 
 			// Verify this inverter has battery support
 			const primaryInverter = inverterInfo.getPrimaryInverter();
+			const discoveredSerialNumber = String( primaryInverter?.isn ?? '' ).trim();
+			if( !discoveredSerialNumber || discoveredSerialNumber === 'xxx' ) {
+				return {
+					error: "Could not discover the inverter serial number."
+				}
+			}
+
 			if( !primaryInverter.hasBatteryStorage() ) {
 				return {
 					error: "This inverter does not have battery storage. Use the regular SolPlanet driver instead."
 				}
 			}
 
-			return inverterInfo.model;
+			this.deviceSerialNr = discoveredSerialNumber;
+			this.homey.log("Discovered device serial number", this.deviceSerialNr );
+
+			return primaryInverter.model;
 		});
 
 		session.setHandler("list_devices", async () => {

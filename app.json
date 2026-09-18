@@ -32,10 +32,12 @@
       {
         "id": "battery_percentage_changed",
         "title": {
-          "en": "Battery percentage changed"
+          "en": "Battery percentage changed",
+          "nl": "Batterijpercentage gewijzigd"
         },
         "hint": {
-          "en": "Triggered when the battery percentage changes"
+          "en": "Triggered when the battery percentage changes",
+          "nl": "Wordt geactiveerd wanneer het batterijpercentage verandert"
         },
         "args": [
           {
@@ -45,16 +47,19 @@
           }
         ],
         "titleFormatted": {
-          "en": "Battery percentage changed"
+          "en": "Battery percentage changed",
+          "nl": "Batterijpercentage gewijzigd"
         }
       },
       {
         "id": "sol_battery_percentage_changed",
         "title": {
-          "en": "Battery percentage changed"
+          "en": "Battery percentage changed",
+          "nl": "Batterijpercentage gewijzigd"
         },
         "hint": {
-          "en": "Triggered when the battery percentage changes"
+          "en": "Triggered when the battery percentage changes",
+          "nl": "Wordt geactiveerd wanneer het batterijpercentage verandert"
         },
         "args": [
           {
@@ -64,7 +69,8 @@
           }
         ],
         "titleFormatted": {
-          "en": "Battery percentage changed"
+          "en": "Battery percentage changed",
+          "nl": "Batterijpercentage gewijzigd"
         }
       }
     ],
@@ -72,7 +78,8 @@
       {
         "id": "battery_above",
         "title": {
-          "en": "Battery is above [[percentage]]%"
+          "en": "Battery is above [[percentage]]%",
+          "nl": "Batterij is boven [[percentage]]%"
         },
         "args": [
           {
@@ -84,7 +91,8 @@
             "type": "number",
             "name": "percentage",
             "title": {
-              "en": "Percentage"
+              "en": "Percentage",
+              "nl": "Percentage"
             }
           }
         ]
@@ -92,7 +100,8 @@
       {
         "id": "sol_battery_above",
         "title": {
-          "en": "Battery is above [[percentage]]%"
+          "en": "Battery is above [[percentage]]%",
+          "nl": "Batterij is boven [[percentage]]%"
         },
         "args": [
           {
@@ -104,7 +113,8 @@
             "type": "number",
             "name": "percentage",
             "title": {
-              "en": "Percentage"
+              "en": "Percentage",
+              "nl": "Percentage"
             }
           }
         ]
@@ -112,7 +122,8 @@
       {
         "id": "is_online",
         "title": {
-          "en": "Device is online"
+          "en": "Device is online",
+          "nl": "Apparaat is online"
         },
         "args": [
           {
@@ -199,7 +210,7 @@
           "id": "ip_address",
           "type": "text",
           "label": {
-            "en": "SolPlanet inverter IP address"
+            "en": "SolPlanet inverter IP address or URL"
           }
         },
         {
@@ -346,7 +357,7 @@
           "id": "ip_address",
           "type": "text",
           "label": {
-            "en": "SolPlanet inverter IP address"
+            "en": "SolPlanet inverter IP address or URL"
           }
         },
         {

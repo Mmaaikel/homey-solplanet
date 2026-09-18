@@ -39,16 +39,6 @@
 			placeholder="192.168.1.20 or https://192.168.1.20:8484"
 			value=""
 		/>
-		
-		<label class="homey-form-label" for="device_serial_number">Device serial number (can be found on your inverter)</label>
-		<input
-			class="homey-form-input"
-			type="text"
-			id="device_serial_number"
-			name="device_serial_number"
-			placeholder=""
-			value=""
-		/>
 	</div>
 	
 	<button
@@ -65,10 +55,9 @@
 		Homey.showLoadingOverlay();
 
 		const ipAddress = document.getElementById("ip_address").value.trim();
-		const deviceSerialNr = document.getElementById("device_serial_number").value.trim();
 
 		try {
-			const result = await Homey.emit("validate", { ipAddress, deviceSerialNr });
+			const result = await Homey.emit("validate", { ipAddress });
 			Homey.hideLoadingOverlay();
 
 			if (result && result.error) {
