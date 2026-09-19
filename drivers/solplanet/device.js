@@ -26,55 +26,62 @@ class SolPlanet extends Inverter {
 
 		super.onInit();
 
-		// Set some info labels
-		const inverterInfo = await this.api.getInverterInfo();
-		this.homey.log('Inverter info fetched', inverterInfo );
-		if( inverterInfo !== null ) {
+		// Refresh metadata when the inverter is reachable. A connection failure must
+		// not prevent Homey from loading the device and its cached capability values.
+		try {
+			const inverterInfo = await this.api.getInverterInfo();
+			this.homey.log('Inverter info fetched', inverterInfo );
+			if( inverterInfo !== null ) {
 
-			const primaryInverter = inverterInfo.getPrimaryInverter();
+				const primaryInverter = inverterInfo.getPrimaryInverter();
 
-			this.setSettings({
-				solplanet_model_label: primaryInverter.model,
-				solplanet_version_label: primaryInverter.cmv,
-			})
+				await this.setSettings({
+					solplanet_model_label: primaryInverter.model,
+					solplanet_version_label: primaryInverter.cmv,
+				})
 
-			const list = this.getCapabilities()
-			this.homey.log("Current capabilities: ", list );
+				const list = this.getCapabilities()
+				this.homey.log("Current capabilities: ", list );
 
-			const createCapabilities = ['meter_power', 'meter_power_today'];
-			for( const capabilityId of createCapabilities ) {
-				if( !this.hasCapability(capabilityId) ) {
-					await this.addCapability(capabilityId);
-					this.homey.log(`Added ${capabilityId} capability`);
+				const createCapabilities = ['meter_power', 'meter_power_today'];
+				for( const capabilityId of createCapabilities ) {
+					if( !this.hasCapability(capabilityId) ) {
+						await this.addCapability(capabilityId);
+						this.homey.log(`Added ${capabilityId} capability`);
+					}
+				}
+
+				const removeCapabilities = ['meter_power.total', 'meter_power.today'];
+				for( const capabilityId of removeCapabilities ) {
+					if( this.hasCapability(capabilityId) ) {
+						await this.removeCapability(capabilityId);
+						this.homey.log(`Removed ${capabilityId} capability`);
+					}
+				}
+
+				// Check battery
+				if( primaryInverter.hasBatteryStorage() ) {
+					this.homey.log("Inverter has battery storage");
+
+					// Add battery_soc capability if not present
+					if( !this.hasCapability('battery_soc') ) {
+						await this.addCapability('battery_soc');
+						this.homey.log("Added battery_soc capability");
+					}
+
+					const batteryInfo = await this.api.getBatteryInfo();
+					if( batteryInfo !== null ) {
+						this.homey.log("Battery info fetched", batteryInfo );
+					}
+				} else {
+					this.homey.log("Inverter does not have battery storage");
 				}
 			}
-
-			const removeCapabilities = ['meter_power.total', 'meter_power.today'];
-			for( const capabilityId of removeCapabilities ) {
-				if( this.hasCapability(capabilityId) ) {
-					await this.removeCapability(capabilityId);
-					this.homey.log(`Removed ${capabilityId} capability`);
-				}
-			}
-
-			// Check battery
-			if( primaryInverter.hasBatteryStorage() ) {
-				this.homey.log("Inverter has battery storage");
-
-				// Add battery_soc capability if not present
-				if( !this.hasCapability('battery_soc') ) {
-					await this.addCapability('battery_soc');
-					this.homey.log("Added battery_soc capability");
-				}
-
-				const batteryInfo = await this.api.getBatteryInfo();
-				if( batteryInfo !== null ) {
-					this.homey.log("Battery info fetched", batteryInfo );
-				}
-			} else {
-				this.homey.log("Inverter does not have battery storage");
-			}
+		} catch (err) {
+			this.homey.log(`Inverter unavailable during initialization; keeping cached values: ${ err.message }`);
 		}
+
+		await this.setAvailable();
 
 		// Conditions
 		// Register the condition card for checking if the window is open
@@ -125,13 +132,6 @@ class SolPlanet extends Inverter {
 
 	async checkProduction() {
 		this.homey.log("Checking production");
-
-		// Check if the device is available
-		if( this.getAvailable() === false ) {
-			this.homey.log("Device is not available. Stop the interval");
-			this.stopInterval()
-			return
-		}
 
 		if( this.api ) {
 			try {

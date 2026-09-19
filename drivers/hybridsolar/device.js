@@ -25,36 +25,41 @@ class HybridSolar extends Inverter {
 
 		super.onInit();
 
-		// Set some info labels
-		const inverterInfo = await this.api.getInverterInfo();
-		if( inverterInfo !== null ) {
+		try {
+			const inverterInfo = await this.api.getInverterInfo();
+			if( inverterInfo !== null ) {
 
-			const primaryInverter = inverterInfo.getPrimaryInverter();
+				const primaryInverter = inverterInfo.getPrimaryInverter();
 
-			this.setSettings({
-				solplanet_model_label: primaryInverter.model,
-				solplanet_version_label: primaryInverter.cmv,
-			})
+				await this.setSettings({
+					solplanet_model_label: primaryInverter.model,
+					solplanet_version_label: primaryInverter.cmv,
+				})
 
-			const list = this.getCapabilities()
-			this.homey.log("Current capabilities: ", list );
+				const list = this.getCapabilities()
+				this.homey.log("Current capabilities: ", list );
 
-			const createCapabilities = ['meter_power'];
-			for( const capabilityId of createCapabilities ) {
-				if( !this.hasCapability(capabilityId) ) {
-					await this.addCapability(capabilityId);
-					this.homey.log(`Added ${capabilityId} capability`);
+				const createCapabilities = ['meter_power'];
+				for( const capabilityId of createCapabilities ) {
+					if( !this.hasCapability(capabilityId) ) {
+						await this.addCapability(capabilityId);
+						this.homey.log(`Added ${capabilityId} capability`);
+					}
+				}
+
+				const removeCapabilities = ['meter_power.total'];
+				for( const capabilityId of removeCapabilities ) {
+					if( this.hasCapability(capabilityId) ) {
+						await this.removeCapability(capabilityId);
+						this.homey.log(`Removed ${capabilityId} capability`);
+					}
 				}
 			}
-
-			const removeCapabilities = ['meter_power.total'];
-			for( const capabilityId of removeCapabilities ) {
-				if( this.hasCapability(capabilityId) ) {
-					await this.removeCapability(capabilityId);
-					this.homey.log(`Removed ${capabilityId} capability`);
-				}
-			}
+		} catch (err) {
+			this.homey.log(`Inverter unavailable during initialization; keeping cached values: ${ err.message }`);
 		}
+
+		await this.setAvailable();
 	}
 
 	setDefaultInterval() {
@@ -91,13 +96,6 @@ class HybridSolar extends Inverter {
 
 	async checkProduction() {
 		this.homey.log("Checking production");
-
-		// Check if the device is available
-		if( this.getAvailable() === false ) {
-			this.homey.log("Device is not available. Stop the interval");
-			this.stopInterval()
-			return
-		}
 
 		if( this.api ) {
 			try {

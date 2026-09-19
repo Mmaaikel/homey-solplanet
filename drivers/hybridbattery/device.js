@@ -25,32 +25,37 @@ class HybridBattery extends Inverter {
 
 		super.onInit();
 
-		// Set some info labels
-		const inverterInfo = await this.api.getInverterInfo();
-		if( inverterInfo !== null ) {
+		try {
+			const inverterInfo = await this.api.getInverterInfo();
+			if( inverterInfo !== null ) {
 
-			const primaryInverter = inverterInfo.getPrimaryInverter();
+				const primaryInverter = inverterInfo.getPrimaryInverter();
 
-			this.setSettings({
-				solplanet_model_label: primaryInverter.model,
-			})
+				await this.setSettings({
+					solplanet_model_label: primaryInverter.model,
+				})
 
-			if( primaryInverter.hasBatteryStorage() ) {
-				const batteryInfo = await this.api.getBatteryInfo();
-				if( batteryInfo !== null ) {
-					this.homey.log("Battery info fetched", batteryInfo );
+				if( primaryInverter.hasBatteryStorage() ) {
+					const batteryInfo = await this.api.getBatteryInfo();
+					if( batteryInfo !== null ) {
+						this.homey.log("Battery info fetched", batteryInfo );
 
-					this.setSettings({
-						solplanet_battery_model_label: batteryInfo.battery?.manufactoty ?? 'Unknown',
-					})
+						await this.setSettings({
+							solplanet_battery_model_label: batteryInfo.battery?.manufactoty ?? 'Unknown',
+						})
 
-					const batteryInfoCapacity = batteryInfo.battery?.capacity ?? 'Unknown';
-					this.setSettings({
-						solplanet_battery_info_capacity: batteryInfoCapacity,
-					});
+						const batteryInfoCapacity = batteryInfo.battery?.capacity ?? 'Unknown';
+						await this.setSettings({
+							solplanet_battery_info_capacity: batteryInfoCapacity,
+						});
+					}
 				}
 			}
+		} catch (err) {
+			this.homey.log(`Inverter unavailable during initialization; keeping cached values: ${ err.message }`);
 		}
+
+		await this.setAvailable();
 
 		// Conditions
 		// Register the condition card for checking if the window is open
@@ -97,13 +102,6 @@ class HybridBattery extends Inverter {
 
 	async checkProduction() {
 		this.homey.log("Checking production");
-
-		// Check if the device is available
-		if( this.getAvailable() === false ) {
-			this.homey.log("Device is not available. Stop the interval");
-			this.stopInterval()
-			return
-		}
 
 		if( this.api ) {
 			try {
