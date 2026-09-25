@@ -2,46 +2,106 @@
   "triggers": [
     {
       "id": "sol_battery_percentage_changed",
-      "title": {
-        "en": "Battery percentage changed",
-        "nl": "Batterijpercentage gewijzigd"
-      },
-      "hint": {
-        "en": "Triggered when the battery percentage changes",
-        "nl": "Wordt geactiveerd wanneer het batterijpercentage verandert"
-      },
-      "args": [],
-      "titleFormatted": {
-        "en": "Battery percentage changed",
-        "nl": "Batterijpercentage gewijzigd"
-      }
+      "title": { "en": "Battery percentage changed", "nl": "Batterijpercentage gewijzigd" },
+      "hint": { "en": "Triggered when the battery percentage changes", "nl": "Wordt geactiveerd wanneer het batterijpercentage verandert" },
+      "tokens": [{ "type": "number", "name": "battery_percentage", "title": { "en": "Battery percentage", "nl": "Batterijpercentage" } }]
+    },
+    {
+      "id": "sol_battery_rises_above",
+      "title": { "en": "Battery rises above a percentage", "nl": "Batterij stijgt boven een percentage" },
+      "titleFormatted": { "en": "Battery rises above [[percentage]]%", "nl": "Batterij stijgt boven [[percentage]]%" },
+      "args": [{ "type": "number", "name": "percentage", "title": { "en": "Percentage", "nl": "Percentage" } }],
+      "tokens": [{ "type": "number", "name": "battery_percentage", "title": { "en": "Battery percentage", "nl": "Batterijpercentage" } }]
+    },
+    {
+      "id": "sol_battery_drops_below",
+      "title": { "en": "Battery drops below a percentage", "nl": "Batterij daalt onder een percentage" },
+      "titleFormatted": { "en": "Battery drops below [[percentage]]%", "nl": "Batterij daalt onder [[percentage]]%" },
+      "args": [{ "type": "number", "name": "percentage", "title": { "en": "Percentage", "nl": "Percentage" } }],
+      "tokens": [{ "type": "number", "name": "battery_percentage", "title": { "en": "Battery percentage", "nl": "Batterijpercentage" } }]
+    },
+    {
+      "id": "sol_battery_started_charging",
+      "title": { "en": "Battery started charging", "nl": "Batterij is begonnen met opladen" },
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Battery power", "nl": "Batterijvermogen" } }]
+    },
+    {
+      "id": "sol_battery_started_discharging",
+      "title": { "en": "Battery started discharging", "nl": "Batterij is begonnen met ontladen" },
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Battery power", "nl": "Batterijvermogen" } }]
+    },
+    {
+      "id": "sol_battery_became_idle",
+      "title": { "en": "Battery became idle", "nl": "Batterij is inactief geworden" },
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Battery power", "nl": "Batterijvermogen" } }]
+    },
+    {
+      "id": "sol_solar_power_rises_above",
+      "title": { "en": "Solar power rises above a value", "nl": "Zonnevermogen stijgt boven een waarde" },
+      "titleFormatted": { "en": "Solar power rises above [[power]] W", "nl": "Zonnevermogen stijgt boven [[power]] W" },
+      "args": [{ "type": "number", "name": "power", "title": { "en": "Power", "nl": "Vermogen" } }],
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Solar power", "nl": "Zonnevermogen" } }]
+    },
+    {
+      "id": "sol_solar_power_drops_below",
+      "title": { "en": "Solar power drops below a value", "nl": "Zonnevermogen daalt onder een waarde" },
+      "titleFormatted": { "en": "Solar power drops below [[power]] W", "nl": "Zonnevermogen daalt onder [[power]] W" },
+      "args": [{ "type": "number", "name": "power", "title": { "en": "Power", "nl": "Vermogen" } }],
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Solar power", "nl": "Zonnevermogen" } }]
+    },
+    {
+      "id": "sol_solar_production_started",
+      "title": { "en": "Solar production started", "nl": "Zonneproductie is gestart" },
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Solar power", "nl": "Zonnevermogen" } }]
+    },
+    {
+      "id": "sol_solar_production_stopped",
+      "title": { "en": "Solar production stopped", "nl": "Zonneproductie is gestopt" },
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Solar power", "nl": "Zonnevermogen" } }]
+    },
+    { "id": "sol_device_online", "title": { "en": "Device came online", "nl": "Apparaat is online gekomen" } },
+    { "id": "sol_device_offline", "title": { "en": "Device went offline", "nl": "Apparaat is offline gegaan" } },
+    {
+      "id": "sol_inverter_fault",
+      "title": { "en": "An inverter warning or error was detected", "nl": "Een omvormerwaarschuwing of -fout is gedetecteerd" },
+      "tokens": [
+        { "type": "string", "name": "code", "title": { "en": "Code", "nl": "Code" } },
+        { "type": "string", "name": "source", "title": { "en": "Source", "nl": "Bron" } }
+      ]
     }
   ],
   "conditions": [
     {
       "id": "sol_battery_above",
-      "title": {
-        "en": "Battery is above [[percentage]]%",
-        "nl": "Batterij is boven [[percentage]]%"
-      },
-      "args": [
-        {
-          "type": "number",
-          "name": "percentage",
-          "title": {
-            "en": "Percentage",
-            "nl": "Percentage"
-          }
-        }
-      ]
+      "title": { "en": "Battery is above [[percentage]]%", "nl": "Batterij is boven [[percentage]]%" },
+      "titleFormatted": { "en": "Battery is above [[percentage]]%", "nl": "Batterij is boven [[percentage]]%" },
+      "args": [{ "type": "number", "name": "percentage", "title": { "en": "Percentage", "nl": "Percentage" } }]
     },
     {
-      "id": "is_online",
-      "title": {
-        "en": "Device is online",
-        "nl": "Apparaat is online"
-      }
-    }
+      "id": "sol_battery_below",
+      "title": { "en": "Battery is below [[percentage]]%", "nl": "Batterij is onder [[percentage]]%" },
+      "titleFormatted": { "en": "Battery is below [[percentage]]%", "nl": "Batterij is onder [[percentage]]%" },
+      "args": [{ "type": "number", "name": "percentage", "title": { "en": "Percentage", "nl": "Percentage" } }]
+    },
+    { "id": "sol_battery_is_charging", "title": { "en": "Battery is charging", "nl": "Batterij wordt opgeladen" } },
+    { "id": "sol_battery_is_discharging", "title": { "en": "Battery is discharging", "nl": "Batterij wordt ontladen" } },
+    { "id": "sol_battery_is_idle", "title": { "en": "Battery is idle", "nl": "Batterij is inactief" } },
+    {
+      "id": "sol_battery_soh_below",
+      "title": { "en": "Battery health is below [[percentage]]%", "nl": "Batterijgezondheid is onder [[percentage]]%" },
+      "titleFormatted": { "en": "Battery health is below [[percentage]]%", "nl": "Batterijgezondheid is onder [[percentage]]%" },
+      "args": [{ "type": "number", "name": "percentage", "title": { "en": "Percentage", "nl": "Percentage" } }]
+    },
+    { "id": "sol_solar_producing", "title": { "en": "Solar panels are producing", "nl": "Zonnepanelen produceren" } },
+    {
+      "id": "sol_solar_power_above",
+      "title": { "en": "Solar power is above [[power]] W", "nl": "Zonnevermogen is boven [[power]] W" },
+      "titleFormatted": { "en": "Solar power is above [[power]] W", "nl": "Zonnevermogen is boven [[power]] W" },
+      "args": [{ "type": "number", "name": "power", "title": { "en": "Power", "nl": "Vermogen" } }]
+    },
+    { "id": "is_online", "title": { "en": "Device is online", "nl": "Apparaat is online" } }
   ],
-  "actions": []
+  "actions": [
+    { "id": "sol_refresh_data", "title": { "en": "Refresh data now", "nl": "Gegevens nu vernieuwen" } }
+  ]
 }

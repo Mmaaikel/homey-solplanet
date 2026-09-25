@@ -82,20 +82,6 @@ class SolPlanet extends Inverter {
 		}
 
 		await this.setAvailable();
-
-		// Conditions
-		// Register the condition card for checking if the window is open
-		const batteryAboveCondition = this.homey.flow.getConditionCard('sol_battery_above');
-		batteryAboveCondition?.registerRunListener(async (args, state) => {
-			const battery = this.getCapabilityValue('battery_soc');
-
-			return battery >= args.percentage;
-		});
-
-		const isOnlineCondition = this.homey.flow.getConditionCard('is_online');
-		isOnlineCondition?.registerRunListener(async () => {
-			return this.isOnline;
-		});
 	}
 
 	setDefaultInterval() {
@@ -144,6 +130,11 @@ class SolPlanet extends Inverter {
 
 					// Also get the data now
 					const inverterData = await this.api.getInverterData();
+					this.updateConnectionState(true, 'sol_device_online', 'sol_device_offline');
+					this.updateFaultState('inverter', {
+						error: inverterData.err,
+						warning: inverterData.wan,
+					}, 'sol_inverter_fault', 'inverter');
 
 					// Reset the checks failed
 					if( this.checksFailed > 0 ) {
@@ -157,7 +148,13 @@ class SolPlanet extends Inverter {
 
 					if( deviceState !== 1 ) {
 						if( deviceState === 0 ) {
-							this.setValueWithCatch('measure_power', 0 );
+							const result = this.setValueWithCatch('measure_power', 0 );
+							this.emitNumericFlowCards(result, {
+								risesAboveCard: 'sol_solar_power_rises_above',
+								dropsBelowCard: 'sol_solar_power_drops_below',
+								tokenName: 'power',
+							});
+							this.updateProducingState('solar', 0, 'sol_solar_production_started', 'sol_solar_production_stopped');
 						}
 
 						return;
@@ -177,7 +174,13 @@ class SolPlanet extends Inverter {
 
 					// Ignore when the current production power is more than 20k?
 					if( Number.isFinite(currentProductionPower) && currentProductionPower <= 20000 ) {
-						this.setValueWithCatch("measure_power", currentProductionPower);
+						const result = this.setValueWithCatch("measure_power", currentProductionPower);
+						this.emitNumericFlowCards(result, {
+							risesAboveCard: 'sol_solar_power_rises_above',
+							dropsBelowCard: 'sol_solar_power_drops_below',
+							tokenName: 'power',
+						});
+						this.updateProducingState('solar', currentProductionPower, 'sol_solar_production_started', 'sol_solar_production_stopped');
 					}
 
 					// Daily (kWh) - etd field
@@ -205,16 +208,36 @@ class SolPlanet extends Inverter {
 						if( batteryData !== null ) {
 
 							// Battery %
-							const batteryPower = Number( _.parseInt( batteryData.soc ) );
-							this.homey.log( `Battery percentage is: ${ batteryPower }%` );
+							const batterySoc = Number( _.parseInt( batteryData.soc ) );
+							this.homey.log( `Battery percentage is: ${ batterySoc }%` );
 
-							if( Number.isFinite(batteryPower) ) {
-								const resultBatterySoc = this.setValueWithCatch("battery_soc", batteryPower);
-
-								if( resultBatterySoc?.isChanged ) {
-									this._triggerFlowCard('sol_battery_percentage_changed', { battery_percentage: batteryPower });
-								}
+							if( Number.isFinite(batterySoc) ) {
+								const result = this.setValueWithCatch("battery_soc", batterySoc);
+								this.emitNumericFlowCards(result, {
+									changedCard: 'sol_battery_percentage_changed',
+									risesAboveCard: 'sol_battery_rises_above',
+									dropsBelowCard: 'sol_battery_drops_below',
+									tokenName: 'battery_percentage',
+								});
 							}
+
+							this.batteryPower = Number( _.parseInt( batteryData.pb ) );
+							this.batteryStateOfHealth = Number( _.parseInt( batteryData.soh ) );
+							this.updateDirectionalPowerState('battery', this.batteryPower, {
+								positive: 'sol_battery_started_charging',
+								negative: 'sol_battery_started_discharging',
+								idle: 'sol_battery_became_idle',
+							});
+							this.updateFaultState('battery', {
+								error1: batteryData.eb1,
+								error2: batteryData.eb2,
+								error3: batteryData.eb3,
+								error4: batteryData.eb4,
+								warning1: batteryData.wb1,
+								warning2: batteryData.wb2,
+								warning3: batteryData.wb3,
+								warning4: batteryData.wb4,
+							}, 'sol_inverter_fault', 'battery');
 						}
 					}
 
@@ -254,6 +277,10 @@ class SolPlanet extends Inverter {
 	}
 
 	async setIsOffline() {
+		if( this.fetchFailed > 3 || this.checksFailed > 3 ) {
+			this.updateConnectionState(false, 'sol_device_online', 'sol_device_offline');
+		}
+
 		if( await this.isHomeyLocalHourBetween(0, 3) ) {
 			// Only reset daily production, not the cumulative meter_power
 			this.setValueWithCatch( 'meter_power_today', 0 );

@@ -1,0 +1,82 @@
+{
+  "triggers": [
+    {
+      "id": "hybrid_solar_power_rises_above",
+      "title": { "en": "Solar power rises above a value", "nl": "Zonnevermogen stijgt boven een waarde" },
+      "titleFormatted": { "en": "Solar power rises above [[power]] W", "nl": "Zonnevermogen stijgt boven [[power]] W" },
+      "args": [{ "type": "number", "name": "power", "title": { "en": "Power", "nl": "Vermogen" } }],
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Solar power", "nl": "Zonnevermogen" } }]
+    },
+    {
+      "id": "hybrid_solar_power_drops_below",
+      "title": { "en": "Solar power drops below a value", "nl": "Zonnevermogen daalt onder een waarde" },
+      "titleFormatted": { "en": "Solar power drops below [[power]] W", "nl": "Zonnevermogen daalt onder [[power]] W" },
+      "args": [{ "type": "number", "name": "power", "title": { "en": "Power", "nl": "Vermogen" } }],
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Solar power", "nl": "Zonnevermogen" } }]
+    },
+    {
+      "id": "hybrid_solar_production_started",
+      "title": { "en": "Solar production started", "nl": "Zonneproductie is gestart" },
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Solar power", "nl": "Zonnevermogen" } }]
+    },
+    {
+      "id": "hybrid_solar_production_stopped",
+      "title": { "en": "Solar production stopped", "nl": "Zonneproductie is gestopt" },
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Solar power", "nl": "Zonnevermogen" } }]
+    },
+    {
+      "id": "hybrid_grid_import_rises_above",
+      "title": { "en": "Grid import rises above a value", "nl": "Netafname stijgt boven een waarde" },
+      "titleFormatted": { "en": "Grid import rises above [[power]] W", "nl": "Netafname stijgt boven [[power]] W" },
+      "args": [{ "type": "number", "name": "power", "title": { "en": "Power", "nl": "Vermogen" } }],
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Grid import", "nl": "Netafname" } }]
+    },
+    {
+      "id": "hybrid_grid_export_rises_above",
+      "title": { "en": "Grid export rises above a value", "nl": "Netteruglevering stijgt boven een waarde" },
+      "titleFormatted": { "en": "Grid export rises above [[power]] W", "nl": "Netteruglevering stijgt boven [[power]] W" },
+      "args": [{ "type": "number", "name": "power", "title": { "en": "Power", "nl": "Vermogen" } }],
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Grid export", "nl": "Netteruglevering" } }]
+    },
+    {
+      "id": "hybrid_grid_started_importing",
+      "title": { "en": "Grid import started", "nl": "Netafname is gestart" },
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Grid power", "nl": "Netvermogen" } }]
+    },
+    {
+      "id": "hybrid_grid_started_exporting",
+      "title": { "en": "Grid export started", "nl": "Netteruglevering is gestart" },
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Grid power", "nl": "Netvermogen" } }]
+    },
+    {
+      "id": "hybrid_grid_became_idle",
+      "title": { "en": "Grid became neutral", "nl": "Netvermogen is neutraal geworden" },
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Grid power", "nl": "Netvermogen" } }]
+    },
+    { "id": "hybrid_device_online", "title": { "en": "Device came online", "nl": "Apparaat is online gekomen" } },
+    { "id": "hybrid_device_offline", "title": { "en": "Device went offline", "nl": "Apparaat is offline gegaan" } },
+    {
+      "id": "hybrid_inverter_fault",
+      "title": { "en": "An inverter or battery warning was detected", "nl": "Een omvormer- of batterijwaarschuwing is gedetecteerd" },
+      "tokens": [
+        { "type": "string", "name": "code", "title": { "en": "Code", "nl": "Code" } },
+        { "type": "string", "name": "source", "title": { "en": "Source", "nl": "Bron" } }
+      ]
+    }
+  ],
+  "conditions": [
+    { "id": "hybrid_solar_producing", "title": { "en": "Solar panels are producing", "nl": "Zonnepanelen produceren" } },
+    {
+      "id": "hybrid_solar_power_above",
+      "title": { "en": "Solar power is above [[power]] W", "nl": "Zonnevermogen is boven [[power]] W" },
+      "titleFormatted": { "en": "Solar power is above [[power]] W", "nl": "Zonnevermogen is boven [[power]] W" },
+      "args": [{ "type": "number", "name": "power", "title": { "en": "Power", "nl": "Vermogen" } }]
+    },
+    { "id": "hybrid_grid_importing", "title": { "en": "Grid is importing", "nl": "Er wordt stroom afgenomen" } },
+    { "id": "hybrid_grid_exporting", "title": { "en": "Grid is exporting", "nl": "Er wordt stroom teruggeleverd" } },
+    { "id": "hybrid_is_online", "title": { "en": "Device is online", "nl": "Apparaat is online" } }
+  ],
+  "actions": [
+    { "id": "hybrid_refresh_data", "title": { "en": "Refresh data now", "nl": "Gegevens nu vernieuwen" } }
+  ]
+}

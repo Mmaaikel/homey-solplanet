@@ -104,6 +104,17 @@ class HybridSolar extends Inverter {
 				if( inverterInfo !== null ) {
 
 					const primaryInverter = inverterInfo.getPrimaryInverter();
+					try {
+						const inverterData = await this.api.getInverterData();
+						if (inverterData !== null) {
+							this.updateFaultState('inverter', {
+								error: inverterData.err,
+								warning: inverterData.wan,
+							}, 'hybrid_inverter_fault', 'inverter');
+						}
+					} catch (err) {
+						this.homey.log("Error fetching inverter warning data:", err.message);
+					}
 
 					// Reset the checks failed
 					if( this.checksFailed > 0 ) {
@@ -118,6 +129,7 @@ class HybridSolar extends Inverter {
 
 					// Get meter data for grid power
 					await this.updateMeterData();
+					this.updateConnectionState(true, 'hybrid_device_online', 'hybrid_device_offline');
 
 					this.setAvailable().catch( this.onError.bind( this ) );
 				}
@@ -131,6 +143,7 @@ class HybridSolar extends Inverter {
 				}
 
 				if( this.checksFailed > 3 ) {
+					this.updateConnectionState(false, 'hybrid_device_online', 'hybrid_device_offline');
 					this.resetInterval( 5 * 60 );
 					this.setValueWithCatch('measure_power', 0 );
 					this.setValueWithCatch('measure_power.grid', 0 );
@@ -163,8 +176,25 @@ class HybridSolar extends Inverter {
 				this.homey.log( `Solar PV power is: ${ solarPower }W` );
 
 				if( Number.isFinite(solarPower) && solarPower <= 20000 ) {
-					this.setValueWithCatch("measure_power", solarPower);
+					const result = this.setValueWithCatch("measure_power", solarPower);
+					this.emitNumericFlowCards(result, {
+						risesAboveCard: 'hybrid_solar_power_rises_above',
+						dropsBelowCard: 'hybrid_solar_power_drops_below',
+						tokenName: 'power',
+					});
+					this.updateProducingState('solar', solarPower, 'hybrid_solar_production_started', 'hybrid_solar_production_stopped');
 				}
+
+				this.updateFaultState('battery', {
+					error1: batteryData.eb1,
+					error2: batteryData.eb2,
+					error3: batteryData.eb3,
+					error4: batteryData.eb4,
+					warning1: batteryData.wb1,
+					warning2: batteryData.wb2,
+					warning3: batteryData.wb3,
+					warning4: batteryData.wb4,
+				}, 'hybrid_inverter_fault', 'battery');
 
 				// Solar energy total (kWh) - etopv field in 0.1 kWh (cumulative, used by Homey Energy)
 				const solarEnergyTotal = Math.abs( Number( _.parseInt( batteryData.etopv ) / 10 ) );
@@ -197,7 +227,31 @@ class HybridSolar extends Inverter {
 				this.homey.log( `Grid power is: ${ gridPower }W` );
 
 				if( Number.isFinite(gridPower) ) {
-					this.setValueWithCatch("measure_power.grid", gridPower);
+					const result = this.setValueWithCatch("measure_power.grid", gridPower);
+					const previous = Number(result.oldValue);
+					if (Number.isFinite(previous) && result.isChanged) {
+						this.emitNumericFlowCards({
+							oldValue: Math.max(previous, 0),
+							newValue: Math.max(gridPower, 0),
+							isChanged: Math.max(previous, 0) !== Math.max(gridPower, 0),
+						}, {
+							risesAboveCard: 'hybrid_grid_import_rises_above',
+							tokenName: 'power',
+						});
+						this.emitNumericFlowCards({
+							oldValue: Math.max(-previous, 0),
+							newValue: Math.max(-gridPower, 0),
+							isChanged: Math.max(-previous, 0) !== Math.max(-gridPower, 0),
+						}, {
+							risesAboveCard: 'hybrid_grid_export_rises_above',
+							tokenName: 'power',
+						});
+					}
+					this.updateDirectionalPowerState('grid', gridPower, {
+						positive: 'hybrid_grid_started_importing',
+						negative: 'hybrid_grid_started_exporting',
+						idle: 'hybrid_grid_became_idle',
+					});
 				}
 
 				// Grid import today (kWh) - itd is in 0.01 kWh

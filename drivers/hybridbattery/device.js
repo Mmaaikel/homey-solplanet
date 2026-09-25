@@ -56,16 +56,6 @@ class HybridBattery extends Inverter {
 		}
 
 		await this.setAvailable();
-
-		// Conditions
-		// Register the condition card for checking if the window is open
-		const batteryAboveCondition = this.homey.flow.getConditionCard('battery_above');
-
-		batteryAboveCondition?.registerRunListener(async (args, state) => {
-			const battery = this.getCapabilityValue('battery_soc');
-
-			return battery >= args.percentage;
-		});
 	}
 
 	setDefaultInterval() {
@@ -109,6 +99,7 @@ class HybridBattery extends Inverter {
 				const batteryData = await this.api.getBatteryData();
 
 				if( batteryData !== null ) {
+					this.updateConnectionState(true, 'battery_device_online', 'battery_device_offline');
 
 					// Reset the checks failed
 					if( this.checksFailed > 0 ) {
@@ -122,6 +113,11 @@ class HybridBattery extends Inverter {
 
 					if( Number.isFinite(batteryPower) ) {
 						this.setValueWithCatch("measure_power", batteryPower);
+						this.updateDirectionalPowerState('battery', batteryPower, {
+							positive: 'battery_started_charging',
+							negative: 'battery_started_discharging',
+							idle: 'battery_became_idle',
+						});
 					}
 
 					// Battery SOC (%)
@@ -131,10 +127,25 @@ class HybridBattery extends Inverter {
 					if( Number.isFinite(batterySoc) ) {
 						const resultBatterySoc = this.setValueWithCatch("battery_soc", batterySoc);
 
-						if( resultBatterySoc?.isChanged ) {
-							this._triggerFlowCard('battery_percentage_changed', { battery_percentage: batterySoc });
-						}
+						this.emitNumericFlowCards(resultBatterySoc, {
+							changedCard: 'battery_percentage_changed',
+							risesAboveCard: 'battery_rises_above',
+							dropsBelowCard: 'battery_drops_below',
+							tokenName: 'battery_percentage',
+						});
 					}
+
+					this.batteryStateOfHealth = Number( _.parseInt( batteryData.soh ) );
+					this.updateFaultState('battery', {
+						error1: batteryData.eb1,
+						error2: batteryData.eb2,
+						error3: batteryData.eb3,
+						error4: batteryData.eb4,
+						warning1: batteryData.wb1,
+						warning2: batteryData.wb2,
+						warning3: batteryData.wb3,
+						warning4: batteryData.wb4,
+					}, 'battery_fault', 'battery');
 
 					// Battery charge today (kWh) - ebi is in 0.1 kWh
 					const batteryChargeToday = Math.abs( Number( _.parseInt( batteryData.ebi ) / 10 ) );
@@ -158,6 +169,7 @@ class HybridBattery extends Inverter {
 				this.onError( err );
 
 				if( this.checksFailed > 3 ) {
+					this.updateConnectionState(false, 'battery_device_online', 'battery_device_offline');
 					this.resetInterval( 5 * 60 );
 					this.setValueWithCatch('measure_power', 0 );
 				}

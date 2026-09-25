@@ -2,39 +2,74 @@
   "triggers": [
     {
       "id": "battery_percentage_changed",
-      "title": {
-        "en": "Battery percentage changed",
-        "nl": "Batterijpercentage gewijzigd"
-      },
-      "hint": {
-        "en": "Triggered when the battery percentage changes",
-        "nl": "Wordt geactiveerd wanneer het batterijpercentage verandert"
-      },
-      "args": [],
-      "titleFormatted": {
-        "en": "Battery percentage changed",
-        "nl": "Batterijpercentage gewijzigd"
-      }
+      "title": { "en": "Battery percentage changed", "nl": "Batterijpercentage gewijzigd" },
+      "tokens": [{ "type": "number", "name": "battery_percentage", "title": { "en": "Battery percentage", "nl": "Batterijpercentage" } }]
+    },
+    {
+      "id": "battery_rises_above",
+      "title": { "en": "Battery rises above a percentage", "nl": "Batterij stijgt boven een percentage" },
+      "titleFormatted": { "en": "Battery rises above [[percentage]]%", "nl": "Batterij stijgt boven [[percentage]]%" },
+      "args": [{ "type": "number", "name": "percentage", "title": { "en": "Percentage", "nl": "Percentage" } }],
+      "tokens": [{ "type": "number", "name": "battery_percentage", "title": { "en": "Battery percentage", "nl": "Batterijpercentage" } }]
+    },
+    {
+      "id": "battery_drops_below",
+      "title": { "en": "Battery drops below a percentage", "nl": "Batterij daalt onder een percentage" },
+      "titleFormatted": { "en": "Battery drops below [[percentage]]%", "nl": "Batterij daalt onder [[percentage]]%" },
+      "args": [{ "type": "number", "name": "percentage", "title": { "en": "Percentage", "nl": "Percentage" } }],
+      "tokens": [{ "type": "number", "name": "battery_percentage", "title": { "en": "Battery percentage", "nl": "Batterijpercentage" } }]
+    },
+    {
+      "id": "battery_started_charging",
+      "title": { "en": "Battery started charging", "nl": "Batterij is begonnen met opladen" },
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Battery power", "nl": "Batterijvermogen" } }]
+    },
+    {
+      "id": "battery_started_discharging",
+      "title": { "en": "Battery started discharging", "nl": "Batterij is begonnen met ontladen" },
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Battery power", "nl": "Batterijvermogen" } }]
+    },
+    {
+      "id": "battery_became_idle",
+      "title": { "en": "Battery became idle", "nl": "Batterij is inactief geworden" },
+      "tokens": [{ "type": "number", "name": "power", "title": { "en": "Battery power", "nl": "Batterijvermogen" } }]
+    },
+    { "id": "battery_device_online", "title": { "en": "Device came online", "nl": "Apparaat is online gekomen" } },
+    { "id": "battery_device_offline", "title": { "en": "Device went offline", "nl": "Apparaat is offline gegaan" } },
+    {
+      "id": "battery_fault",
+      "title": { "en": "A battery warning or error was detected", "nl": "Een batterijwaarschuwing of -fout is gedetecteerd" },
+      "tokens": [
+        { "type": "string", "name": "code", "title": { "en": "Code", "nl": "Code" } },
+        { "type": "string", "name": "source", "title": { "en": "Source", "nl": "Bron" } }
+      ]
     }
   ],
   "conditions": [
     {
       "id": "battery_above",
-      "title": {
-        "en": "Battery is above [[percentage]]%",
-        "nl": "Batterij is boven [[percentage]]%"
-      },
-      "args": [
-        {
-          "type": "number",
-          "name": "percentage",
-          "title": {
-            "en": "Percentage",
-            "nl": "Percentage"
-          }
-        }
-      ]
-    }
+      "title": { "en": "Battery is above [[percentage]]%", "nl": "Batterij is boven [[percentage]]%" },
+      "titleFormatted": { "en": "Battery is above [[percentage]]%", "nl": "Batterij is boven [[percentage]]%" },
+      "args": [{ "type": "number", "name": "percentage", "title": { "en": "Percentage", "nl": "Percentage" } }]
+    },
+    {
+      "id": "battery_below",
+      "title": { "en": "Battery is below [[percentage]]%", "nl": "Batterij is onder [[percentage]]%" },
+      "titleFormatted": { "en": "Battery is below [[percentage]]%", "nl": "Batterij is onder [[percentage]]%" },
+      "args": [{ "type": "number", "name": "percentage", "title": { "en": "Percentage", "nl": "Percentage" } }]
+    },
+    { "id": "battery_is_charging", "title": { "en": "Battery is charging", "nl": "Batterij wordt opgeladen" } },
+    { "id": "battery_is_discharging", "title": { "en": "Battery is discharging", "nl": "Batterij wordt ontladen" } },
+    { "id": "battery_is_idle", "title": { "en": "Battery is idle", "nl": "Batterij is inactief" } },
+    {
+      "id": "battery_soh_below",
+      "title": { "en": "Battery health is below [[percentage]]%", "nl": "Batterijgezondheid is onder [[percentage]]%" },
+      "titleFormatted": { "en": "Battery health is below [[percentage]]%", "nl": "Batterijgezondheid is onder [[percentage]]%" },
+      "args": [{ "type": "number", "name": "percentage", "title": { "en": "Percentage", "nl": "Percentage" } }]
+    },
+    { "id": "battery_is_online", "title": { "en": "Device is online", "nl": "Apparaat is online" } }
   ],
-  "actions": []
+  "actions": [
+    { "id": "battery_refresh_data", "title": { "en": "Refresh data now", "nl": "Gegevens nu vernieuwen" } }
+  ]
 }
