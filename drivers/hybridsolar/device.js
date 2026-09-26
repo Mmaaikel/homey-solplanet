@@ -69,14 +69,19 @@ class HybridSolar extends Inverter {
 		this.resetInterval( this.interval );
 	}
 
-	async onSettings({ newSettings, changedKeys}) {
+	async onSettings({ newSettings = {}, changedKeys = [] } = {}) {
+		const settings = {
+			...this.getSettings(),
+			...newSettings,
+		};
+
 		// Init the API with new settings
-		const solPlanetClient = new SolPlanetClient( newSettings.ip_address, newSettings.device_serial_number );
+		const solPlanetClient = new SolPlanetClient( settings.ip_address, settings.device_serial_number );
 		const newApi = new SolPlanetApi( solPlanetClient );
 
 		// Validate
 		const inverterInfo = await newApi.getInverterInfo();
-		if( inverterInfo === null ) {
+		if( inverterInfo === null || inverterInfo.getPrimaryInverter() === null ) {
 			throw new Error(
 				`Could not fetch the correct data. Check the settings.`
 			);
@@ -86,11 +91,12 @@ class HybridSolar extends Inverter {
 		this.api = newApi;
 
 		// Force production check when settings are changed
-		this.checkProduction();
+		this.checkProduction().catch( this.onError.bind( this ) );
 
-		if (changedKeys.includes("interval") && newSettings.interval) {
-			this.resetInterval( newSettings.interval );
-			this.homey.log(`Changed interval to ${newSettings.interval}`);
+		if( changedKeys.includes("interval") && settings.interval ) {
+			this.interval = settings.interval;
+			this.resetInterval( this.interval );
+			this.homey.log(`Changed interval to ${ this.interval }`);
 		}
 	}
 
