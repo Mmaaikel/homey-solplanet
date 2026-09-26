@@ -26,6 +26,32 @@ class SolPlanet extends Inverter {
 
 		super.onInit();
 
+		// Capability migrations must not depend on the inverter being reachable
+		// during app startup. Existing devices do not automatically receive newly
+		// added capabilities from the driver manifest.
+		try {
+			const list = this.getCapabilities();
+			this.homey.log("Current capabilities: ", list );
+
+			const createCapabilities = ['meter_power', 'meter_power_today'];
+			for( const capabilityId of createCapabilities ) {
+				if( !this.hasCapability(capabilityId) ) {
+					await this.addCapability(capabilityId);
+					this.homey.log(`Added ${capabilityId} capability`);
+				}
+			}
+
+			const removeCapabilities = ['meter_power.total', 'meter_power.today'];
+			for( const capabilityId of removeCapabilities ) {
+				if( this.hasCapability(capabilityId) ) {
+					await this.removeCapability(capabilityId);
+					this.homey.log(`Removed ${capabilityId} capability`);
+				}
+			}
+		} catch (err) {
+			this.homey.log(`Could not migrate device capabilities: ${ err.message }`);
+		}
+
 		// Refresh metadata when the inverter is reachable. A connection failure must
 		// not prevent Homey from loading the device and its cached capability values.
 		try {
@@ -39,25 +65,6 @@ class SolPlanet extends Inverter {
 					solplanet_model_label: primaryInverter.model,
 					solplanet_version_label: primaryInverter.cmv,
 				})
-
-				const list = this.getCapabilities()
-				this.homey.log("Current capabilities: ", list );
-
-				const createCapabilities = ['meter_power', 'meter_power_today'];
-				for( const capabilityId of createCapabilities ) {
-					if( !this.hasCapability(capabilityId) ) {
-						await this.addCapability(capabilityId);
-						this.homey.log(`Added ${capabilityId} capability`);
-					}
-				}
-
-				const removeCapabilities = ['meter_power.total', 'meter_power.today'];
-				for( const capabilityId of removeCapabilities ) {
-					if( this.hasCapability(capabilityId) ) {
-						await this.removeCapability(capabilityId);
-						this.homey.log(`Removed ${capabilityId} capability`);
-					}
-				}
 
 				// Check battery
 				if( primaryInverter.hasBatteryStorage() ) {
@@ -152,6 +159,24 @@ class SolPlanet extends Inverter {
 					const deviceState = _.parseInt( inverterData.flg );
 					this.homey.log( `Current device state is: ${ deviceState }` );
 
+					// Energy counters remain useful when the inverter is idle. Some
+					// firmware versions also use different active-state values.
+					const dailyProductionRaw = inverterData.etd ?? primaryInverter.etd;
+					const dailyProductionEnergy = Math.abs( Number( _.parseInt( dailyProductionRaw ) / 10 ) );
+					this.homey.log( `Daily production energy is: ${ dailyProductionEnergy }kWh` );
+
+					if( Number.isFinite(dailyProductionEnergy) ) {
+						this.setValueWithCatch("meter_power_today", dailyProductionEnergy);
+					}
+
+					const totalProductionRaw = inverterData.eto ?? primaryInverter.eto;
+					const totalProductionEnergy = Math.abs( Number( _.parseInt( totalProductionRaw ) / 10 ) );
+					this.homey.log( `Total production energy is: ${ totalProductionEnergy }kWh` );
+
+					if( Number.isFinite(totalProductionEnergy) ) {
+						this.setValueWithCatch("meter_power", totalProductionEnergy);
+					}
+
 					if( deviceState !== 1 ) {
 						if( deviceState === 0 ) {
 							const result = this.setValueWithCatch('measure_power', 0 );
@@ -187,22 +212,6 @@ class SolPlanet extends Inverter {
 							tokenName: 'power',
 						});
 						this.updateProducingState('solar', currentProductionPower, 'sol_solar_production_started', 'sol_solar_production_stopped');
-					}
-
-					// Daily (kWh) - etd field
-					const dailyProductionEnergy = Math.abs( Number( _.parseInt( primaryInverter.etd ) / 10 ) );
-					this.homey.log( `Daily production energy is: ${ dailyProductionEnergy }kWh` );
-
-					if( Number.isFinite(dailyProductionEnergy) ) {
-						this.setValueWithCatch("meter_power_today", dailyProductionEnergy);
-					}
-
-					// Total (kWh) - eto field (cumulative, used by Homey Energy)
-					const totalProductionEnergy = Math.abs( Number( _.parseInt( primaryInverter.eto ) / 10 ) );
-					this.homey.log( `Total production energy is: ${ totalProductionEnergy }kWh` );
-
-					if( Number.isFinite(totalProductionEnergy) ) {
-						this.setValueWithCatch("meter_power", totalProductionEnergy);
 					}
 
 					// Check if there is a battery
