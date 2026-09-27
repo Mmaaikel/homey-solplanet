@@ -27,6 +27,8 @@ class HybridBatteryDriver extends Homey.Driver {
 				}
 			}
 
+			this.ipAddress = solPlanetClient.getBaseUrl();
+
 			// Verify this inverter has battery support
 			const primaryInverter = inverterInfo.getPrimaryInverter();
 			const discoveredSerialNumber = String( primaryInverter?.isn ?? '' ).trim();

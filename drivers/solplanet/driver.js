@@ -27,6 +27,8 @@ class SolPlanetDriver extends Homey.Driver {
 				}
 			}
 
+			this.ipAddress = solPlanetClient.getBaseUrl();
+
 			const primaryInverter = inverterInfo.getPrimaryInverter();
 			const discoveredSerialNumber = String( primaryInverter?.isn ?? '' ).trim();
 			if( !discoveredSerialNumber || discoveredSerialNumber === 'xxx' ) {
