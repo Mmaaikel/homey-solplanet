@@ -39,7 +39,7 @@ class HybridSolar extends Inverter {
 				const list = this.getCapabilities()
 				this.homey.log("Current capabilities: ", list );
 
-				const createCapabilities = ['meter_power'];
+				const createCapabilities = ['meter_power', 'measure_power.inverter'];
 				for( const capabilityId of createCapabilities ) {
 					if( !this.hasCapability(capabilityId) ) {
 						await this.addCapability(capabilityId);
@@ -113,6 +113,14 @@ class HybridSolar extends Inverter {
 					try {
 						const inverterData = await this.api.getInverterData();
 						if (inverterData !== null) {
+							// Inverter AC output includes power supplied by the battery.
+							const inverterPower = Number( _.parseInt( inverterData.pac ) );
+							this.homey.log( `Inverter AC output is: ${ inverterPower }W` );
+
+							if( Number.isFinite(inverterPower) ) {
+								this.setValueWithCatch('measure_power.inverter', inverterPower);
+							}
+
 							this.updateFaultState('inverter', {
 								error: inverterData.err,
 								warning: inverterData.wan,
@@ -152,6 +160,7 @@ class HybridSolar extends Inverter {
 					this.updateConnectionState(false, 'hybrid_device_online', 'hybrid_device_offline');
 					this.resetInterval( 5 * 60 );
 					this.setValueWithCatch('measure_power', 0 );
+					this.setValueWithCatch('measure_power.inverter', 0 );
 					this.setValueWithCatch('measure_power.grid', 0 );
 				}
 			}
