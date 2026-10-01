@@ -1,7 +1,6 @@
 import { Inverter } from "../../lib/inverter.js";
 import SolPlanetApi from "../../lib/SolPlanetApi.js";
 import SolPlanetClient from "../../lib/SolPlanetClient.js";
-import _ from 'lodash'
 
 class HybridSolar extends Inverter {
 
@@ -26,6 +25,42 @@ class HybridSolar extends Inverter {
 		super.onInit();
 
 		try {
+			const createCapabilities = [
+				'meter_power.solar_total',
+				'measure_power.inverter',
+				'measure_power.dongle_pv',
+				'measure_power.mppt1',
+				'measure_power.mppt2',
+				'measure_power.mppt3',
+				'measure_power.phase1',
+				'measure_power.phase2',
+				'measure_power.phase3',
+				'measure_voltage.phase1',
+				'measure_voltage.phase2',
+				'measure_voltage.phase3',
+				'measure_current.phase1',
+				'measure_current.phase2',
+				'measure_current.phase3',
+			];
+			for( const capabilityId of createCapabilities ) {
+				if( !this.hasCapability(capabilityId) ) {
+					await this.addCapability(capabilityId);
+					this.homey.log(`Added ${ capabilityId } capability`);
+				}
+			}
+
+			const removeCapabilities = ['meter_power', 'meter_power.total'];
+			for( const capabilityId of removeCapabilities ) {
+				if( this.hasCapability(capabilityId) ) {
+					await this.removeCapability(capabilityId);
+					this.homey.log(`Removed ${ capabilityId } capability`);
+				}
+			}
+		} catch (err) {
+			this.homey.log(`Could not migrate device capabilities: ${ err.message }`);
+		}
+
+		try {
 			const inverterInfo = await this.api.getInverterInfo();
 			if( inverterInfo !== null ) {
 
@@ -36,24 +71,6 @@ class HybridSolar extends Inverter {
 					solplanet_version_label: primaryInverter.cmv,
 				})
 
-				const list = this.getCapabilities()
-				this.homey.log("Current capabilities: ", list );
-
-				const createCapabilities = ['meter_power', 'measure_power.inverter'];
-				for( const capabilityId of createCapabilities ) {
-					if( !this.hasCapability(capabilityId) ) {
-						await this.addCapability(capabilityId);
-						this.homey.log(`Added ${capabilityId} capability`);
-					}
-				}
-
-				const removeCapabilities = ['meter_power.total'];
-				for( const capabilityId of removeCapabilities ) {
-					if( this.hasCapability(capabilityId) ) {
-						await this.removeCapability(capabilityId);
-						this.homey.log(`Removed ${capabilityId} capability`);
-					}
-				}
 			}
 		} catch (err) {
 			this.homey.log(`Inverter unavailable during initialization; keeping cached values: ${ err.message }`);
@@ -110,15 +127,36 @@ class HybridSolar extends Inverter {
 				if( inverterInfo !== null ) {
 
 					const primaryInverter = inverterInfo.getPrimaryInverter();
+					let inverterData = null;
 					try {
-						const inverterData = await this.api.getInverterData();
+						inverterData = await this.api.getInverterData();
 						if (inverterData !== null) {
 							// Inverter AC output includes power supplied by the battery.
-							const inverterPower = Number( _.parseInt( inverterData.pac ) );
+							const inverterPower = this.parseApiNumber(inverterData.pac, {
+								invalidValues: [0xFFFFFFFF],
+							});
 							this.homey.log( `Inverter AC output is: ${ inverterPower }W` );
 
-							if( Number.isFinite(inverterPower) ) {
+							if( inverterPower !== null ) {
 								this.setValueWithCatch('measure_power.inverter', inverterPower);
+							}
+
+							const inverterTemperature = this.parseApiNumber(inverterData.tmp, {
+								divisor: 10,
+								invalidValues: [-32768],
+							});
+							if( inverterTemperature !== null ) {
+								this.setValueWithCatch('measure_temperature', inverterTemperature);
+							}
+
+							this.updateInverterDiagnostics(inverterData);
+
+							const pvPower = this.calculatePvPower(inverterData);
+							this.homey.log( `Calculated PV array power is: ${ pvPower }W` );
+							if( pvPower !== null ) {
+								this.updateSolarPower(pvPower);
+							} else if( inverterPower === 0 ) {
+								this.updateSolarPower(0);
 							}
 
 							this.updateFaultState('inverter', {
@@ -127,7 +165,41 @@ class HybridSolar extends Inverter {
 							}, 'hybrid_inverter_fault', 'inverter');
 						}
 					} catch (err) {
-						this.homey.log("Error fetching inverter warning data:", err.message);
+						this.homey.log("Error fetching inverter data:", err.message);
+					}
+
+					if( inverterData === null ) {
+						const inverterPower = this.parseApiNumber(primaryInverter.pac, {
+							invalidValues: [0xFFFFFFFF],
+						});
+						if( inverterPower !== null ) {
+							this.setValueWithCatch('measure_power.inverter', inverterPower);
+						}
+						if( inverterPower === 0 ) {
+							this.updateSolarPower(0);
+						}
+					}
+
+					const solarEnergyTodayRaw = inverterData?.etd ?? primaryInverter.etd;
+					const solarEnergyTodayValue = this.parseApiNumber(solarEnergyTodayRaw, {
+						divisor: 10,
+						invalidValues: [0xFFFFFFFF],
+					});
+					if( solarEnergyTodayValue !== null ) {
+						const solarEnergyToday = Math.abs(solarEnergyTodayValue);
+						this.homey.log( `Solar energy today is: ${ solarEnergyToday }kWh` );
+						this.setValueWithCatch('meter_power.solar_today', solarEnergyToday);
+					}
+
+					const solarEnergyTotalRaw = inverterData?.eto ?? primaryInverter.eto;
+					const solarEnergyTotalValue = this.parseApiNumber(solarEnergyTotalRaw, {
+						divisor: 10,
+						invalidValues: [0xFFFFFFFF],
+					});
+					if( solarEnergyTotalValue !== null ) {
+						const solarEnergyTotal = Math.abs(solarEnergyTotalValue);
+						this.homey.log( `Solar energy total is: ${ solarEnergyTotal }kWh` );
+						this.setValueWithCatch('meter_power.solar_total', solarEnergyTotal);
 					}
 
 					// Reset the checks failed
@@ -136,9 +208,9 @@ class HybridSolar extends Inverter {
 						this.setDefaultInterval()
 					}
 
-					// Get battery data for pure solar values
+					// Get battery diagnostics and the firmware-specific ppv value.
 					if( primaryInverter.hasBatteryStorage() ) {
-						await this.updateSolarData();
+						await this.updateBatteryDiagnostics();
 					}
 
 					// Get meter data for grid power
@@ -161,6 +233,7 @@ class HybridSolar extends Inverter {
 					this.resetInterval( 5 * 60 );
 					this.setValueWithCatch('measure_power', 0 );
 					this.setValueWithCatch('measure_power.inverter', 0 );
+					this.setValueWithCatch('measure_power.dongle_pv', 0 );
 					this.setValueWithCatch('measure_power.grid', 0 );
 				}
 			}
@@ -173,34 +246,33 @@ class HybridSolar extends Inverter {
 		}
 	}
 
-	async updateSolarData() {
+	updateSolarPower(solarPower) {
+		const result = this.setValueWithCatch('measure_power', solarPower);
+		this.emitNumericFlowCards(result, {
+			risesAboveCard: 'hybrid_solar_power_rises_above',
+			dropsBelowCard: 'hybrid_solar_power_drops_below',
+			tokenName: 'power',
+		});
+		this.updateProducingState('solar', solarPower, 'hybrid_solar_production_started', 'hybrid_solar_production_stopped');
+	}
+
+	async updateBatteryDiagnostics() {
 		try {
 			const batteryData = await this.api.getBatteryData();
 
 			if( batteryData !== null ) {
-				// Temperature (C) - tb field in 0.1C
-				const temperature = Number( _.parseInt( batteryData.tb ) / 10 );
-				this.homey.log( `Temperature is: ${ temperature }C` );
+				// Some hybrid firmware reports export-like power in ppv. Keep it as a
+				// diagnostic value instead of using it for Homey solar production.
+				const donglePvPower = this.parseApiNumber(batteryData.ppv, {
+					invalidValues: [0xFFFFFFFF],
+				});
+				this.homey.log( `Dongle reported PV power is: ${ donglePvPower }W` );
 
-				if( Number.isFinite(temperature) ) {
-					this.setValueWithCatch("measure_temperature", temperature);
+				if( donglePvPower !== null ) {
+					this.setValueWithCatch('measure_power.dongle_pv', donglePvPower);
 				}
 
-				// Pure solar power (W) - ppv field from battery data
-				const solarPower = Number( _.parseInt( batteryData.ppv ) );
-				this.homey.log( `Solar PV power is: ${ solarPower }W` );
-
-				if( Number.isFinite(solarPower) && solarPower <= 20000 ) {
-					const result = this.setValueWithCatch("measure_power", solarPower);
-					this.emitNumericFlowCards(result, {
-						risesAboveCard: 'hybrid_solar_power_rises_above',
-						dropsBelowCard: 'hybrid_solar_power_drops_below',
-						tokenName: 'power',
-					});
-					this.updateProducingState('solar', solarPower, 'hybrid_solar_production_started', 'hybrid_solar_production_stopped');
-				}
-
-				this.updateFaultState('battery', {
+				this.updateActiveLowFaultState('battery', {
 					error1: batteryData.eb1,
 					error2: batteryData.eb2,
 					error3: batteryData.eb3,
@@ -210,22 +282,6 @@ class HybridSolar extends Inverter {
 					warning3: batteryData.wb3,
 					warning4: batteryData.wb4,
 				}, 'hybrid_inverter_fault', 'battery');
-
-				// Solar energy total (kWh) - etopv field in 0.1 kWh (cumulative, used by Homey Energy)
-				const solarEnergyTotal = Math.abs( Number( _.parseInt( batteryData.etopv ) / 10 ) );
-				this.homey.log( `Solar energy total is: ${ solarEnergyTotal }kWh` );
-
-				if( Number.isFinite(solarEnergyTotal) ) {
-					this.setValueWithCatch("meter_power", solarEnergyTotal);
-				}
-
-				// Solar energy today (kWh) - etdpv field in 0.1 kWh
-				const solarEnergyToday = Math.abs( Number( _.parseInt( batteryData.etdpv ) / 10 ) );
-				this.homey.log( `Solar energy today is: ${ solarEnergyToday }kWh` );
-
-				if( Number.isFinite(solarEnergyToday) ) {
-					this.setValueWithCatch("meter_power.solar_today", solarEnergyToday);
-				}
 			}
 		} catch (err) {
 			this.homey.log("Error fetching battery/solar data:", err.message);
@@ -238,10 +294,12 @@ class HybridSolar extends Inverter {
 
 			if( meterData !== null ) {
 				// Grid power (W) - positive is import, negative is export
-				const gridPower = Number( _.parseInt( meterData.pac ) );
+				const gridPower = this.parseApiNumber(meterData.pac, {
+					invalidValues: [-2147483648, 0xFFFFFFFF],
+				});
 				this.homey.log( `Grid power is: ${ gridPower }W` );
 
-				if( Number.isFinite(gridPower) ) {
+				if( gridPower !== null ) {
 					const result = this.setValueWithCatch("measure_power.grid", gridPower);
 					const previous = Number(result.oldValue);
 					if (Number.isFinite(previous) && result.isChanged) {
@@ -270,34 +328,50 @@ class HybridSolar extends Inverter {
 				}
 
 				// Grid import today (kWh) - itd is in 0.01 kWh
-				const gridImportToday = Math.abs( Number( _.parseInt( meterData.itd ) / 100 ) );
+				const gridImportTodayValue = this.parseApiNumber(meterData.itd, {
+					divisor: 100,
+					invalidValues: [0xFFFFFFFF],
+				});
+				const gridImportToday = gridImportTodayValue === null ? null : Math.abs(gridImportTodayValue);
 				this.homey.log( `Grid import today is: ${ gridImportToday }kWh` );
 
-				if( Number.isFinite(gridImportToday) ) {
+				if( gridImportToday !== null ) {
 					this.setValueWithCatch("meter_power.grid_import_today", gridImportToday);
 				}
 
 				// Grid export today (kWh) - otd is in 0.01 kWh
-				const gridExportToday = Math.abs( Number( _.parseInt( meterData.otd ) / 100 ) );
+				const gridExportTodayValue = this.parseApiNumber(meterData.otd, {
+					divisor: 100,
+					invalidValues: [0xFFFFFFFF],
+				});
+				const gridExportToday = gridExportTodayValue === null ? null : Math.abs(gridExportTodayValue);
 				this.homey.log( `Grid export today is: ${ gridExportToday }kWh` );
 
-				if( Number.isFinite(gridExportToday) ) {
+				if( gridExportToday !== null ) {
 					this.setValueWithCatch("meter_power.grid_export_today", gridExportToday);
 				}
 
 				// Grid import total (kWh) - iet is in 0.1 kWh
-				const gridImportTotal = Math.abs( Number( _.parseInt( meterData.iet ) / 10 ) );
+				const gridImportTotalValue = this.parseApiNumber(meterData.iet, {
+					divisor: 10,
+					invalidValues: [0xFFFFFFFF],
+				});
+				const gridImportTotal = gridImportTotalValue === null ? null : Math.abs(gridImportTotalValue);
 				this.homey.log( `Grid import total is: ${ gridImportTotal }kWh` );
 
-				if( Number.isFinite(gridImportTotal) ) {
+				if( gridImportTotal !== null ) {
 					this.setValueWithCatch("meter_power.grid_import_total", gridImportTotal);
 				}
 
 				// Grid export total (kWh) - oet is in 0.1 kWh
-				const gridExportTotal = Math.abs( Number( _.parseInt( meterData.oet ) / 10 ) );
+				const gridExportTotalValue = this.parseApiNumber(meterData.oet, {
+					divisor: 10,
+					invalidValues: [0xFFFFFFFF],
+				});
+				const gridExportTotal = gridExportTotalValue === null ? null : Math.abs(gridExportTotalValue);
 				this.homey.log( `Grid export total is: ${ gridExportTotal }kWh` );
 
-				if( Number.isFinite(gridExportTotal) ) {
+				if( gridExportTotal !== null ) {
 					this.setValueWithCatch("meter_power.grid_export_total", gridExportTotal);
 				}
 			}

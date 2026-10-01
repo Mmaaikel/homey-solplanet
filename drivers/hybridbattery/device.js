@@ -1,7 +1,6 @@
 import { Inverter } from "../../lib/inverter.js";
 import SolPlanetApi from "../../lib/SolPlanetApi.js";
 import SolPlanetClient from "../../lib/SolPlanetClient.js";
-import _ from 'lodash'
 
 class HybridBattery extends Inverter {
 
@@ -24,6 +23,30 @@ class HybridBattery extends Inverter {
 		this.setDefaultInterval()
 
 		super.onInit();
+
+		try {
+			const createCapabilities = [
+				'battery_soc.health',
+				'measure_temperature',
+				'measure_voltage',
+				'measure_current',
+				'measure_current.charge_limit',
+				'measure_current.discharge_limit',
+				'measure_power.eps',
+				'meter_power.imported',
+				'meter_power.exported',
+				'meter_power.eps_today',
+				'meter_power.eps_total',
+			];
+			for( const capabilityId of createCapabilities ) {
+				if( !this.hasCapability(capabilityId) ) {
+					await this.addCapability(capabilityId);
+					this.homey.log(`Added ${ capabilityId } capability`);
+				}
+			}
+		} catch (err) {
+			this.homey.log(`Could not migrate device capabilities: ${ err.message }`);
+		}
 
 		try {
 			const inverterInfo = await this.api.getInverterInfo();
@@ -114,10 +137,12 @@ class HybridBattery extends Inverter {
 					}
 
 					// Battery power (W) - positive=charging, negative=discharging (matches Homey convention)
-					const batteryPower = Number( _.parseInt( batteryData.pb ) );
+					const batteryPower = this.parseApiNumber(batteryData.pb, {
+						invalidValues: [-2147483648, 0xFFFFFFFF],
+					});
 					this.homey.log( `Battery power is: ${ batteryPower }W` );
 
-					if( Number.isFinite(batteryPower) ) {
+					if( batteryPower !== null ) {
 						this.setValueWithCatch("measure_power", batteryPower);
 						this.updateDirectionalPowerState('battery', batteryPower, {
 							positive: 'battery_started_charging',
@@ -127,10 +152,12 @@ class HybridBattery extends Inverter {
 					}
 
 					// Battery SOC (%)
-					const batterySoc = Number( _.parseInt( batteryData.soc ) );
+					const batterySoc = this.parseApiNumber(batteryData.soc, {
+						invalidValues: [0xFFFF],
+					});
 					this.homey.log( `Battery SOC is: ${ batterySoc }%` );
 
-					if( Number.isFinite(batterySoc) ) {
+					if( batterySoc !== null && batterySoc >= 0 && batterySoc <= 100 ) {
 						const resultBatterySoc = this.setValueWithCatch("battery_soc", batterySoc);
 
 						this.emitNumericFlowCards(resultBatterySoc, {
@@ -141,8 +168,54 @@ class HybridBattery extends Inverter {
 						});
 					}
 
-					this.batteryStateOfHealth = Number( _.parseInt( batteryData.soh ) );
-					this.updateFaultState('battery', {
+					this.batteryStateOfHealth = this.parseApiNumber(batteryData.soh, {
+						invalidValues: [0xFFFF],
+					});
+					if( this.batteryStateOfHealth !== null && this.batteryStateOfHealth >= 0 && this.batteryStateOfHealth <= 100 ) {
+						this.setValueWithCatch('battery_soc.health', this.batteryStateOfHealth);
+					}
+
+					const batteryTemperature = this.parseApiNumber(batteryData.tb, {
+						divisor: 10,
+						invalidValues: [-32768],
+					});
+					if( batteryTemperature !== null ) {
+						this.setValueWithCatch('measure_temperature', batteryTemperature);
+					}
+
+					const batteryVoltage = this.parseApiNumber(batteryData.vb, {
+						divisor: 100,
+						invalidValues: [0xFFFFFFFF],
+					});
+					if( batteryVoltage !== null ) {
+						this.setValueWithCatch('measure_voltage', batteryVoltage);
+					}
+
+					const batteryCurrent = this.parseApiNumber(batteryData.cb, {
+						divisor: 10,
+						invalidValues: [-2147483648, -32768, 0xFFFFFFFF],
+					});
+					if( batteryCurrent !== null ) {
+						this.setValueWithCatch('measure_current', batteryCurrent);
+					}
+
+					const chargeCurrentLimit = this.parseApiNumber(batteryData.cli, {
+						divisor: 10,
+						invalidValues: [0xFFFF],
+					});
+					if( chargeCurrentLimit !== null ) {
+						this.setValueWithCatch('measure_current.charge_limit', chargeCurrentLimit);
+					}
+
+					const dischargeCurrentLimit = this.parseApiNumber(batteryData.clo, {
+						divisor: 10,
+						invalidValues: [0xFFFF],
+					});
+					if( dischargeCurrentLimit !== null ) {
+						this.setValueWithCatch('measure_current.discharge_limit', dischargeCurrentLimit);
+					}
+
+					this.updateActiveLowFaultState('battery', {
 						error1: batteryData.eb1,
 						error2: batteryData.eb2,
 						error3: batteryData.eb3,
@@ -154,19 +227,52 @@ class HybridBattery extends Inverter {
 					}, 'battery_fault', 'battery');
 
 					// Battery charge today (kWh) - ebi is in 0.1 kWh
-					const batteryChargeToday = Math.abs( Number( _.parseInt( batteryData.ebi ) / 10 ) );
+					const batteryChargeValue = this.parseApiNumber(batteryData.ebi, {
+						divisor: 10,
+						invalidValues: [0xFFFFFFFF],
+					});
+					const batteryChargeToday = batteryChargeValue === null ? null : Math.abs(batteryChargeValue);
 					this.homey.log( `Battery charge today is: ${ batteryChargeToday }kWh` );
 
-					if( Number.isFinite(batteryChargeToday) ) {
-						const resultBatteryChargeToday = this.setValueWithCatch("meter_power.battery_charge_today", batteryChargeToday);
+					if( batteryChargeToday !== null ) {
+						this.setValueWithCatch("meter_power.battery_charge_today", batteryChargeToday);
+						this.setValueWithCatch('meter_power.imported', batteryChargeToday);
 					}
 
 					// Battery discharge today (kWh) - ebo is in 0.1 kWh
-					const batteryDischargeToday = Math.abs( Number( _.parseInt( batteryData.ebo ) / 10 ) );
+					const batteryDischargeValue = this.parseApiNumber(batteryData.ebo, {
+						divisor: 10,
+						invalidValues: [0xFFFFFFFF],
+					});
+					const batteryDischargeToday = batteryDischargeValue === null ? null : Math.abs(batteryDischargeValue);
 					this.homey.log( `Battery discharge today is: ${ batteryDischargeToday }kWh` );
 
-					if( Number.isFinite(batteryDischargeToday) ) {
+					if( batteryDischargeToday !== null ) {
 						this.setValueWithCatch("meter_power.battery_discharge_today", batteryDischargeToday);
+						this.setValueWithCatch('meter_power.exported', batteryDischargeToday);
+					}
+
+					const epsPower = this.parseApiNumber(batteryData.pesp, {
+						invalidValues: [0xFFFFFFFF],
+					});
+					if( epsPower !== null ) {
+						this.setValueWithCatch('measure_power.eps', epsPower);
+					}
+
+					const epsEnergyToday = this.parseApiNumber(batteryData.etdesp, {
+						divisor: 10,
+						invalidValues: [0xFFFFFFFF],
+					});
+					if( epsEnergyToday !== null ) {
+						this.setValueWithCatch('meter_power.eps_today', Math.abs(epsEnergyToday));
+					}
+
+					const epsEnergyTotal = this.parseApiNumber(batteryData.etoesp, {
+						divisor: 10,
+						invalidValues: [0xFFFFFFFF],
+					});
+					if( epsEnergyTotal !== null ) {
+						this.setValueWithCatch('meter_power.eps_total', Math.abs(epsEnergyTotal));
 					}
 
 					this.setAvailable().catch( this.onError.bind( this ) );

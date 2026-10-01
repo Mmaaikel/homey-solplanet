@@ -1,7 +1,6 @@
 import { Inverter } from "../../lib/inverter.js";
 import SolPlanetApi from "../../lib/SolPlanetApi.js";
 import SolPlanetClient from "../../lib/SolPlanetClient.js";
-import _ from 'lodash'
 
 class SolPlanet extends Inverter {
 
@@ -33,7 +32,22 @@ class SolPlanet extends Inverter {
 			const list = this.getCapabilities();
 			this.homey.log("Current capabilities: ", list );
 
-			const createCapabilities = ['meter_power', 'meter_power_today'];
+			const createCapabilities = [
+				'meter_power',
+				'meter_power_today',
+				'measure_power.mppt1',
+				'measure_power.mppt2',
+				'measure_power.mppt3',
+				'measure_power.phase1',
+				'measure_power.phase2',
+				'measure_power.phase3',
+				'measure_voltage.phase1',
+				'measure_voltage.phase2',
+				'measure_voltage.phase3',
+				'measure_current.phase1',
+				'measure_current.phase2',
+				'measure_current.phase3',
+			];
 			for( const capabilityId of createCapabilities ) {
 				if( !this.hasCapability(capabilityId) ) {
 					await this.addCapability(capabilityId);
@@ -144,6 +158,7 @@ class SolPlanet extends Inverter {
 					// Also get the data now
 					const inverterData = await this.api.getInverterData();
 					this.updateConnectionState(true, 'sol_device_online', 'sol_device_offline');
+					this.updateInverterDiagnostics(inverterData);
 					this.updateFaultState('inverter', {
 						error: inverterData.err,
 						warning: inverterData.wan,
@@ -156,24 +171,34 @@ class SolPlanet extends Inverter {
 					}
 
 					// FLG -> the current state of the device
-					const deviceState = _.parseInt( inverterData.flg );
+					const deviceState = this.parseApiNumber(inverterData.flg, {
+						invalidValues: [0xFF],
+					});
 					this.homey.log( `Current device state is: ${ deviceState }` );
 
 					// Energy counters remain useful when the inverter is idle. Some
 					// firmware versions also use different active-state values.
 					const dailyProductionRaw = inverterData.etd ?? primaryInverter.etd;
-					const dailyProductionEnergy = Math.abs( Number( _.parseInt( dailyProductionRaw ) / 10 ) );
+					const dailyProductionValue = this.parseApiNumber(dailyProductionRaw, {
+						divisor: 10,
+						invalidValues: [0xFFFFFFFF],
+					});
+					const dailyProductionEnergy = dailyProductionValue === null ? null : Math.abs(dailyProductionValue);
 					this.homey.log( `Daily production energy is: ${ dailyProductionEnergy }kWh` );
 
-					if( Number.isFinite(dailyProductionEnergy) ) {
+					if( dailyProductionEnergy !== null ) {
 						this.setValueWithCatch("meter_power_today", dailyProductionEnergy);
 					}
 
 					const totalProductionRaw = inverterData.eto ?? primaryInverter.eto;
-					const totalProductionEnergy = Math.abs( Number( _.parseInt( totalProductionRaw ) / 10 ) );
+					const totalProductionValue = this.parseApiNumber(totalProductionRaw, {
+						divisor: 10,
+						invalidValues: [0xFFFFFFFF],
+					});
+					const totalProductionEnergy = totalProductionValue === null ? null : Math.abs(totalProductionValue);
 					this.homey.log( `Total production energy is: ${ totalProductionEnergy }kWh` );
 
-					if( Number.isFinite(totalProductionEnergy) ) {
+					if( totalProductionEnergy !== null ) {
 						this.setValueWithCatch("meter_power", totalProductionEnergy);
 					}
 
@@ -192,19 +217,23 @@ class SolPlanet extends Inverter {
 					}
 
 					// Temperature
-					const currentTemperature = Number( _.parseInt( inverterData.tmp ) / 10 );
+					const currentTemperature = this.parseApiNumber(inverterData.tmp, {
+						divisor: 10,
+						invalidValues: [-32768],
+					});
 					this.homey.log( `Current inverter temperature is: ${ currentTemperature }` );
 
-					if( Number.isFinite(currentTemperature) ) {
+					if( currentTemperature !== null ) {
 						this.setValueWithCatch("measure_temperature", currentTemperature);
 					}
 
 					// Current (w)
-					let currentProductionPower = Number( _.parseInt( primaryInverter.pac ) );
+					const currentProductionPower = this.parseApiNumber(inverterData.pac, {
+						invalidValues: [0xFFFFFFFF],
+					});
 					this.homey.log( `Current production power is: ${ currentProductionPower }W` );
 
-					// Ignore when the current production power is more than 20k?
-					if( Number.isFinite(currentProductionPower) && currentProductionPower <= 20000 ) {
+					if( currentProductionPower !== null ) {
 						const result = this.setValueWithCatch("measure_power", currentProductionPower);
 						this.emitNumericFlowCards(result, {
 							risesAboveCard: 'sol_solar_power_rises_above',
@@ -223,10 +252,12 @@ class SolPlanet extends Inverter {
 						if( batteryData !== null ) {
 
 							// Battery %
-							const batterySoc = Number( _.parseInt( batteryData.soc ) );
+							const batterySoc = this.parseApiNumber(batteryData.soc, {
+								invalidValues: [0xFFFF],
+							});
 							this.homey.log( `Battery percentage is: ${ batterySoc }%` );
 
-							if( Number.isFinite(batterySoc) ) {
+							if( batterySoc !== null && batterySoc >= 0 && batterySoc <= 100 ) {
 								const result = this.setValueWithCatch("battery_soc", batterySoc);
 								this.emitNumericFlowCards(result, {
 									changedCard: 'sol_battery_percentage_changed',
@@ -236,14 +267,18 @@ class SolPlanet extends Inverter {
 								});
 							}
 
-							this.batteryPower = Number( _.parseInt( batteryData.pb ) );
-							this.batteryStateOfHealth = Number( _.parseInt( batteryData.soh ) );
+							this.batteryPower = this.parseApiNumber(batteryData.pb, {
+								invalidValues: [-2147483648, 0xFFFFFFFF],
+							});
+							this.batteryStateOfHealth = this.parseApiNumber(batteryData.soh, {
+								invalidValues: [0xFFFF],
+							});
 							this.updateDirectionalPowerState('battery', this.batteryPower, {
 								positive: 'sol_battery_started_charging',
 								negative: 'sol_battery_started_discharging',
 								idle: 'sol_battery_became_idle',
 							});
-							this.updateFaultState('battery', {
+							this.updateActiveLowFaultState('battery', {
 								error1: batteryData.eb1,
 								error2: batteryData.eb2,
 								error3: batteryData.eb3,

@@ -71,9 +71,9 @@ class SolPlanet extends Homey.App {
 		}
 
 		const deviceValueConditions = {
-			sol_battery_is_charging: device => Number(device.batteryPower) > 25,
-			sol_battery_is_discharging: device => Number(device.batteryPower) < -25,
-			sol_battery_is_idle: device => Number.isFinite(Number(device.batteryPower)) && Math.abs(Number(device.batteryPower)) <= 25,
+			sol_battery_is_charging: device => device.batteryPower !== null && device.batteryPower !== undefined && Number(device.batteryPower) > 25,
+			sol_battery_is_discharging: device => device.batteryPower !== null && device.batteryPower !== undefined && Number(device.batteryPower) < -25,
+			sol_battery_is_idle: device => device.batteryPower !== null && device.batteryPower !== undefined && Number.isFinite(Number(device.batteryPower)) && Math.abs(Number(device.batteryPower)) <= 25,
 		};
 
 		for (const [cardId, predicate] of Object.entries(deviceValueConditions)) {
@@ -88,6 +88,10 @@ class SolPlanet extends Homey.App {
 
 		for (const cardId of ['sol_battery_soh_below', 'battery_soh_below']) {
 			this.homey.flow.getConditionCard(cardId).registerRunListener(async args => {
+				if( args.device.batteryStateOfHealth === null || args.device.batteryStateOfHealth === undefined ) {
+					return false;
+				}
+
 				const stateOfHealth = Number(args.device.batteryStateOfHealth);
 				return Number.isFinite(stateOfHealth) && stateOfHealth < Number(args.percentage);
 			});

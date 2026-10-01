@@ -7,7 +7,7 @@ This document describes the API parameters returned by the SolPlanet inverter lo
 | Driver | Homey Class | Energy Config | Description |
 |--------|-------------|---------------|-------------|
 | `solplanet` | `solarpanel` | `meterPowerExportedCapability: "meter_power"` | Standard inverters (no battery) |
-| `hybridsolar` | `solarpanel` | `meterPowerExportedCapability: "meter_power"` | Hybrid inverter solar production + grid |
+| `hybridsolar` | `solarpanel` | `meterPowerExportedCapability: "meter_power.solar_total"` | Hybrid inverter solar production + grid |
 | `hybridbattery` | `battery` | `homeBattery: true` | Hybrid inverter battery storage |
 
 ---
@@ -19,10 +19,14 @@ Data retrieved via `getInverterData()` and `getInverterInfo()`.
 | API Parameter | Description | Divisor | Unit | `solplanet` | `hybridsolar` | `hybridbattery` |
 |---------------|-------------|---------|------|-------------|---------------|-----------------|
 | `flg` | Device state flag. `0` = offline, `1` = running | - | - | State check | - | - |
-| `tmp` | Inverter internal temperature | 10 | °C | `measure_temperature` | - | - |
-| `pac` | Inverter AC power output (includes battery discharge for hybrid) | 1 | W | `measure_power` | - | - |
-| `etd` | AC energy today (includes battery discharge for hybrid) | 10 | kWh | `meter_power_today` | - | - |
-| `eto` | AC energy total (cumulative lifetime) | 10 | kWh | `meter_power` | - | - |
+| `tmp` | Inverter internal temperature | 10 | °C | `measure_temperature` | `measure_temperature` | - |
+| `pac` | Inverter AC power output (can include battery discharge for hybrid) | 1 | W | `measure_power` | `measure_power.inverter` | - |
+| `pac1`-`pac3` | Active power per AC phase | 1 | W | `measure_power.phase1`-`.phase3` | `measure_power.phase1`-`.phase3` | - |
+| `vac[]` | Voltage per AC phase | 10 | V | `measure_voltage.phase1`-`.phase3` | `measure_voltage.phase1`-`.phase3` | - |
+| `iac[]` | Current per AC phase | 10 | A | `measure_current.phase1`-`.phase3` | `measure_current.phase1`-`.phase3` | - |
+| `vpv[]`, `ipv[]` | MPPT voltage and current, used to calculate power | 10, 100 | V, A | `measure_power.mppt1`-`.mppt3` | `measure_power.mppt1`-`.mppt3` | - |
+| `etd` | Inverter production energy today | 10 | kWh | `meter_power_today` | `meter_power.solar_today` | - |
+| `eto` | Inverter production energy total | 10 | kWh | `meter_power` | `meter_power.solar_total` | - |
 | `model` | Inverter model name (e.g., "ASW5000-S") | - | - | Settings label | Settings label | Settings label |
 | `cmv` | Communication module version / firmware version | - | - | Settings label | Settings label | - |
 | `isn` | Inverter serial number (used as unique device identifier) | - | - | Device `sid` | Device `sid` + `-solar` | Device `sid` + `-battery` |
@@ -49,23 +53,32 @@ Data retrieved via `getBatteryData()` and `getBatteryInfo()`. Only available on 
 
 ### PV/Solar Production (from Battery endpoint)
 
-For hybrid inverters, pure solar production data comes from the battery endpoint (inverter endpoint `pac`/`eto`/`etd` include battery discharge).
+Hybrid firmware does not use `ppv`, `etdpv`, and `etopv` consistently. On some models these values closely follow grid export rather than total PV production. HybridSolar therefore calculates live PV power from the inverter MPPT voltage/current arrays and uses the inverter production counters for energy.
 
 | API Parameter | Description | Divisor | Unit | `solplanet` | `hybridsolar` | `hybridbattery` |
 |---------------|-------------|---------|------|-------------|---------------|-----------------|
-| `ppv` | PV/Solar power - current solar panel production | 1 | W | - | `measure_power` | - |
-| `etdpv` | PV/Solar energy today (pure solar, excludes battery) | 10 | kWh | - | `meter_power.solar_today` | - |
-| `etopv` | PV/Solar energy total (cumulative lifetime) | 10 | kWh | - | `meter_power` | - |
-| `tb` | Inverter/battery temperature | 10 | °C | - | `measure_temperature` | - |
+| `ppv` | Firmware-specific PV-related power | 1 | W | - | `measure_power.dongle_pv` | - |
+| `vpv[]`, `ipv[]` | MPPT voltage/current used to calculate total PV array power | 10, 100 | V, A | - | `measure_power` | - |
+| `etdpv` | Firmware-specific PV-related energy today | 10 | kWh | - | Diagnostic only | - |
+| `etopv` | Firmware-specific PV-related energy total | 10 | kWh | - | Diagnostic only | - |
+| `tb` | Battery temperature | 10 | °C | - | - | `measure_temperature` |
 
 ### Battery Status
 
 | API Parameter | Description | Divisor | Unit | `solplanet` | `hybridsolar` | `hybridbattery` |
 |---------------|-------------|---------|------|-------------|---------------|-----------------|
 | `soc` | State of Charge - current battery level | 1 | % | `battery_soc` | - | `battery_soc` |
+| `soh` | State of Health | 1 | % | Internal Flow state | - | `battery_soc.health` |
 | `pb` | Battery power. Positive = charging, Negative = discharging | 1 | W | - | - | `measure_power` |
-| `ebi` | Energy Battery In - charged today (resets at midnight) | 10 | kWh | - | - | `meter_power.battery_charge_today` |
-| `ebo` | Energy Battery Out - discharged today (resets at midnight) | 10 | kWh | - | - | `meter_power.battery_discharge_today` |
+| `vb` | Battery voltage | 100 | V | - | - | `measure_voltage` |
+| `cb` | Battery current | 10 | A | - | - | `measure_current` |
+| `cli` | Charge current limit | 10 | A | - | - | `measure_current.charge_limit` |
+| `clo` | Discharge current limit | 10 | A | - | - | `measure_current.discharge_limit` |
+| `ebi` | Energy Battery In - charged today (resets at midnight) | 10 | kWh | - | - | `meter_power.battery_charge_today`, `meter_power.imported` |
+| `ebo` | Energy Battery Out - discharged today (resets at midnight) | 10 | kWh | - | - | `meter_power.battery_discharge_today`, `meter_power.exported` |
+| `pesp` | EPS/backup output power | 1 | W | - | - | `measure_power.eps` |
+| `etdesp` | EPS energy today | 10 | kWh | - | - | `meter_power.eps_today` |
+| `etoesp` | EPS energy total | 10 | kWh | - | - | `meter_power.eps_total` |
 
 ### Battery Info (from `getBatteryInfo()`)
 
@@ -80,7 +93,7 @@ For hybrid inverters, pure solar production data comes from the battery endpoint
 | Method | Returns | Used By |
 |--------|---------|---------|
 | `getInverterInfo()` | `InverterInfo` object | `solplanet`, `hybridsolar`, `hybridbattery` |
-| `getInverterData()` | Raw data object | `solplanet` only |
+| `getInverterData()` | Raw data object | `solplanet`, `hybridsolar` |
 | `getMeterData()` | Raw data object | `hybridsolar` only |
 | `getBatteryInfo()` | Raw data object | `hybridbattery` only |
 | `getBatteryData()` | Raw data object | `hybridsolar`, `hybridbattery` |
@@ -114,4 +127,8 @@ For hybrid inverters, pure solar production data comes from the battery endpoint
    - `0` = Inverter is offline or in sleep mode (typically at night)
    - `1` = Inverter is running and producing power
 
-6. **Why hybrid uses battery endpoint for solar data**: The inverter endpoint fields `pac`, `eto`, `etd` include battery discharge energy mixed in. The battery endpoint provides `ppv`, `etopv`, `etdpv` which represent pure solar production only.
+6. **Hybrid solar sources**: Live PV production is the sum of each valid MPPT's `vpv × ipv`. Total inverter AC output remains available separately from `pac`. The `ppv` field is retained as a diagnostic because its meaning differs between firmware versions.
+
+7. **Unavailable values**: Firmware sentinel values such as `0xFFFFFFFF`, `0xFFFF`, and `-32768` must be ignored rather than published as measurements.
+
+8. **Battery fault words**: Battery error and warning words are active-low. A set bit means no fault; cleared bits identify active faults.

@@ -1412,8 +1412,19 @@
       "capabilities": [
         "measure_power",
         "battery_soc",
+        "battery_soc.health",
+        "measure_temperature",
+        "measure_voltage",
+        "measure_current",
+        "measure_current.charge_limit",
+        "measure_current.discharge_limit",
+        "measure_power.eps",
+        "meter_power.imported",
+        "meter_power.exported",
         "meter_power.battery_charge_today",
-        "meter_power.battery_discharge_today"
+        "meter_power.battery_discharge_today",
+        "meter_power.eps_today",
+        "meter_power.eps_total"
       ],
       "capabilitiesOptions": {
         "measure_power": {
@@ -1428,6 +1439,60 @@
             "nl": "Batterij Laadniveau (%)"
           }
         },
+        "battery_soc.health": {
+          "title": {
+            "en": "Battery State of Health (%)",
+            "nl": "Batterijconditie (%)"
+          }
+        },
+        "measure_temperature": {
+          "title": {
+            "en": "Battery Temperature",
+            "nl": "Batterijtemperatuur"
+          }
+        },
+        "measure_voltage": {
+          "title": {
+            "en": "Battery Voltage",
+            "nl": "Batterijspanning"
+          }
+        },
+        "measure_current": {
+          "title": {
+            "en": "Battery Current",
+            "nl": "Batterijstroom"
+          }
+        },
+        "measure_current.charge_limit": {
+          "title": {
+            "en": "Battery Charge Current Limit",
+            "nl": "Batterij Laadstroomlimiet"
+          }
+        },
+        "measure_current.discharge_limit": {
+          "title": {
+            "en": "Battery Discharge Current Limit",
+            "nl": "Batterij Ontlaadstroomlimiet"
+          }
+        },
+        "measure_power.eps": {
+          "title": {
+            "en": "EPS Output Power",
+            "nl": "EPS Uitgangsvermogen"
+          }
+        },
+        "meter_power.imported": {
+          "title": {
+            "en": "Battery Charged Energy",
+            "nl": "Batterij Opgeladen Energie"
+          }
+        },
+        "meter_power.exported": {
+          "title": {
+            "en": "Battery Discharged Energy",
+            "nl": "Batterij Ontladen Energie"
+          }
+        },
         "meter_power.battery_charge_today": {
           "title": {
             "en": "Battery Charged Today (kWh)",
@@ -1438,6 +1503,18 @@
           "title": {
             "en": "Battery Discharged Today (kWh)",
             "nl": "Batterij Ontladen Vandaag (kWh)"
+          }
+        },
+        "meter_power.eps_today": {
+          "title": {
+            "en": "EPS Energy Today (kWh)",
+            "nl": "EPS Energie Vandaag (kWh)"
+          }
+        },
+        "meter_power.eps_total": {
+          "title": {
+            "en": "EPS Energy Lifetime (kWh)",
+            "nl": "EPS Energie Totaal (kWh)"
           }
         }
       },
@@ -1502,7 +1579,7 @@
       ],
       "class": "solarpanel",
       "energy": {
-        "meterPowerExportedCapability": "meter_power"
+        "meterPowerExportedCapability": "meter_power.solar_total"
       },
       "pair": [
         {
@@ -1523,10 +1600,23 @@
       "capabilities": [
         "measure_power",
         "measure_power.inverter",
-        "meter_power",
+        "measure_power.dongle_pv",
+        "meter_power.solar_total",
         "measure_temperature",
         "meter_power.solar_today",
         "measure_power.grid",
+        "measure_power.mppt1",
+        "measure_power.mppt2",
+        "measure_power.mppt3",
+        "measure_power.phase1",
+        "measure_power.phase2",
+        "measure_power.phase3",
+        "measure_voltage.phase1",
+        "measure_voltage.phase2",
+        "measure_voltage.phase3",
+        "measure_current.phase1",
+        "measure_current.phase2",
+        "measure_current.phase3",
         "meter_power.grid_import_today",
         "meter_power.grid_export_today",
         "meter_power.grid_import_total",
@@ -1535,8 +1625,8 @@
       "capabilitiesOptions": {
         "measure_power": {
           "title": {
-            "en": "Solar Power (W)",
-            "nl": "Zonne-energie (W)"
+            "en": "PV Array Power (DC)",
+            "nl": "PV-paneelvermogen (DC)"
           }
         },
         "measure_power.inverter": {
@@ -1546,7 +1636,14 @@
           },
           "insights": true
         },
-        "meter_power": {
+        "measure_power.dongle_pv": {
+          "title": {
+            "en": "Dongle Reported PV Power (W)",
+            "nl": "Door dongle gemeld PV-vermogen (W)"
+          },
+          "insights": true
+        },
+        "meter_power.solar_total": {
           "title": {
             "en": "Solar Energy Lifetime (kWh)",
             "nl": "Zonne-energie Totaal (kWh)"
@@ -1570,6 +1667,78 @@
             "nl": "Netvermogen Nu (W)"
           },
           "insights": true
+        },
+        "measure_power.mppt1": {
+          "title": {
+            "en": "MPPT 1 Power",
+            "nl": "MPPT 1 Vermogen"
+          }
+        },
+        "measure_power.mppt2": {
+          "title": {
+            "en": "MPPT 2 Power",
+            "nl": "MPPT 2 Vermogen"
+          }
+        },
+        "measure_power.mppt3": {
+          "title": {
+            "en": "MPPT 3 Power",
+            "nl": "MPPT 3 Vermogen"
+          }
+        },
+        "measure_power.phase1": {
+          "title": {
+            "en": "AC Phase 1 Power",
+            "nl": "AC Fase 1 Vermogen"
+          }
+        },
+        "measure_power.phase2": {
+          "title": {
+            "en": "AC Phase 2 Power",
+            "nl": "AC Fase 2 Vermogen"
+          }
+        },
+        "measure_power.phase3": {
+          "title": {
+            "en": "AC Phase 3 Power",
+            "nl": "AC Fase 3 Vermogen"
+          }
+        },
+        "measure_voltage.phase1": {
+          "title": {
+            "en": "AC Phase 1 Voltage",
+            "nl": "AC Fase 1 Spanning"
+          }
+        },
+        "measure_voltage.phase2": {
+          "title": {
+            "en": "AC Phase 2 Voltage",
+            "nl": "AC Fase 2 Spanning"
+          }
+        },
+        "measure_voltage.phase3": {
+          "title": {
+            "en": "AC Phase 3 Voltage",
+            "nl": "AC Fase 3 Spanning"
+          }
+        },
+        "measure_current.phase1": {
+          "title": {
+            "en": "AC Phase 1 Current",
+            "nl": "AC Fase 1 Stroom"
+          }
+        },
+        "measure_current.phase2": {
+          "title": {
+            "en": "AC Phase 2 Current",
+            "nl": "AC Fase 2 Stroom"
+          }
+        },
+        "measure_current.phase3": {
+          "title": {
+            "en": "AC Phase 3 Current",
+            "nl": "AC Fase 3 Stroom"
+          }
         },
         "meter_power.grid_import_today": {
           "title": {
@@ -1677,7 +1846,19 @@
         "meter_power_today",
         "meter_power",
         "battery_soc",
-        "measure_temperature"
+        "measure_temperature",
+        "measure_power.mppt1",
+        "measure_power.mppt2",
+        "measure_power.mppt3",
+        "measure_power.phase1",
+        "measure_power.phase2",
+        "measure_power.phase3",
+        "measure_voltage.phase1",
+        "measure_voltage.phase2",
+        "measure_voltage.phase3",
+        "measure_current.phase1",
+        "measure_current.phase2",
+        "measure_current.phase3"
       ],
       "capabilitiesOptions": {
         "measure_power": {
@@ -1702,6 +1883,78 @@
           "title": {
             "en": "Inverter Temperature",
             "nl": "Omvormer Temperatuur"
+          }
+        },
+        "measure_power.mppt1": {
+          "title": {
+            "en": "MPPT 1 Power",
+            "nl": "MPPT 1 Vermogen"
+          }
+        },
+        "measure_power.mppt2": {
+          "title": {
+            "en": "MPPT 2 Power",
+            "nl": "MPPT 2 Vermogen"
+          }
+        },
+        "measure_power.mppt3": {
+          "title": {
+            "en": "MPPT 3 Power",
+            "nl": "MPPT 3 Vermogen"
+          }
+        },
+        "measure_power.phase1": {
+          "title": {
+            "en": "AC Phase 1 Power",
+            "nl": "AC Fase 1 Vermogen"
+          }
+        },
+        "measure_power.phase2": {
+          "title": {
+            "en": "AC Phase 2 Power",
+            "nl": "AC Fase 2 Vermogen"
+          }
+        },
+        "measure_power.phase3": {
+          "title": {
+            "en": "AC Phase 3 Power",
+            "nl": "AC Fase 3 Vermogen"
+          }
+        },
+        "measure_voltage.phase1": {
+          "title": {
+            "en": "AC Phase 1 Voltage",
+            "nl": "AC Fase 1 Spanning"
+          }
+        },
+        "measure_voltage.phase2": {
+          "title": {
+            "en": "AC Phase 2 Voltage",
+            "nl": "AC Fase 2 Spanning"
+          }
+        },
+        "measure_voltage.phase3": {
+          "title": {
+            "en": "AC Phase 3 Voltage",
+            "nl": "AC Fase 3 Spanning"
+          }
+        },
+        "measure_current.phase1": {
+          "title": {
+            "en": "AC Phase 1 Current",
+            "nl": "AC Fase 1 Stroom"
+          }
+        },
+        "measure_current.phase2": {
+          "title": {
+            "en": "AC Phase 2 Current",
+            "nl": "AC Fase 2 Stroom"
+          }
+        },
+        "measure_current.phase3": {
+          "title": {
+            "en": "AC Phase 3 Current",
+            "nl": "AC Fase 3 Stroom"
           }
         },
         "meter_power": {
