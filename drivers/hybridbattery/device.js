@@ -136,10 +136,12 @@ class HybridBattery extends Inverter {
 						this.setDefaultInterval()
 					}
 
-					// Battery power (W) - positive=charging, negative=discharging (matches Homey convention)
-					const batteryPower = this.parseApiNumber(batteryData.pb, {
+					// Battery power (W) - the API reports negative=charging, positive=discharging.
+					// Invert it so it matches Homey: positive=charging, negative=discharging.
+					const apiBatteryPower = this.parseApiNumber(batteryData.pb, {
 						invalidValues: [-2147483648, 0xFFFFFFFF],
 					});
+					const batteryPower = apiBatteryPower === null ? null : 0 - apiBatteryPower; // 0 - x avoids -0
 					this.homey.log( `Battery power is: ${ batteryPower }W` );
 
 					if( batteryPower !== null ) {
@@ -191,11 +193,13 @@ class HybridBattery extends Inverter {
 						this.setValueWithCatch('measure_voltage', batteryVoltage);
 					}
 
-					const batteryCurrent = this.parseApiNumber(batteryData.cb, {
+					// Battery current (A) - inverted like battery power: positive=charging
+					const apiBatteryCurrent = this.parseApiNumber(batteryData.cb, {
 						divisor: 10,
 						invalidValues: [-2147483648, -32768, 0xFFFFFFFF],
 					});
-					if( batteryCurrent !== null ) {
+					if( apiBatteryCurrent !== null ) {
+						const batteryCurrent = 0 - apiBatteryCurrent;
 						this.setValueWithCatch('measure_current', batteryCurrent);
 					}
 

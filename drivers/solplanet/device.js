@@ -267,9 +267,11 @@ class SolPlanet extends Inverter {
 								});
 							}
 
-							this.batteryPower = this.parseApiNumber(batteryData.pb, {
+							// The API reports negative=charging; invert to positive=charging
+							const apiBatteryPower = this.parseApiNumber(batteryData.pb, {
 								invalidValues: [-2147483648, 0xFFFFFFFF],
 							});
+							this.batteryPower = apiBatteryPower === null ? null : 0 - apiBatteryPower; // 0 - x avoids -0
 							this.batteryStateOfHealth = this.parseApiNumber(batteryData.soh, {
 								invalidValues: [0xFFFF],
 							});
