@@ -90,6 +90,18 @@ class SolPlanet extends Inverter {
 						this.homey.log("Added battery_soc capability");
 					}
 
+					// measure_battery is the system capability Homey offers as status indicator
+					if( !this.hasCapability('measure_battery') ) {
+						await this.addCapability('measure_battery');
+						await this.setCapabilityOptions('measure_battery', {
+							title: {
+								en: 'Battery Charge Level (%)',
+								nl: 'Batterij Laadniveau (%)',
+							},
+						});
+						this.homey.log("Added measure_battery capability");
+					}
+
 					const batteryInfo = await this.api.getBatteryInfo();
 					if( batteryInfo !== null ) {
 						this.homey.log("Battery info fetched", batteryInfo );
@@ -259,6 +271,11 @@ class SolPlanet extends Inverter {
 
 							if( batterySoc !== null && batterySoc >= 0 && batterySoc <= 100 ) {
 								const result = this.setValueWithCatch("battery_soc", batterySoc);
+
+								if( this.hasCapability('measure_battery') ) {
+									this.setValueWithCatch('measure_battery', batterySoc);
+								}
+
 								this.emitNumericFlowCards(result, {
 									changedCard: 'sol_battery_percentage_changed',
 									risesAboveCard: 'sol_battery_rises_above',

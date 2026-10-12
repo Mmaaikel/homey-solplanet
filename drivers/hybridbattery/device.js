@@ -26,6 +26,7 @@ class HybridBattery extends Inverter {
 
 		try {
 			const createCapabilities = [
+				'measure_battery',
 				'battery_soc.health',
 				'measure_temperature',
 				'measure_voltage',
@@ -161,6 +162,11 @@ class HybridBattery extends Inverter {
 
 					if( batterySoc !== null && batterySoc >= 0 && batterySoc <= 100 ) {
 						const resultBatterySoc = this.setValueWithCatch("battery_soc", batterySoc);
+
+						// measure_battery is the system capability Homey uses for the status indicator and Energy view
+						if( this.hasCapability('measure_battery') ) {
+							this.setValueWithCatch('measure_battery', batterySoc);
+						}
 
 						this.emitNumericFlowCards(resultBatterySoc, {
 							changedCard: 'battery_percentage_changed',

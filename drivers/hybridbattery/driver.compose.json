@@ -37,6 +37,7 @@
   ],
   "capabilities": [
     "measure_power",
+    "measure_battery",
     "battery_soc",
     "battery_soc.health",
     "measure_temperature",
@@ -57,6 +58,12 @@
       "title": {
         "en": "Battery Power (W)",
         "nl": "Batterijvermogen (W)"
+      }
+    },
+    "measure_battery": {
+      "title": {
+        "en": "Battery Charge Level (%)",
+        "nl": "Batterij Laadniveau (%)"
       }
     },
     "battery_soc": {
