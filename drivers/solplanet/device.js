@@ -169,6 +169,13 @@ class SolPlanet extends Inverter {
 
 					// Also get the data now
 					const inverterData = await this.api.getInverterData();
+					if( inverterData === null ) {
+						// The inverter reports no valid data while in standby; the battery is still readable
+						this.homey.log("Inverter returned no valid data");
+						await this.updateBatteryData(primaryInverter);
+						return;
+					}
+
 					this.updateConnectionState(true, 'sol_device_online', 'sol_device_offline');
 					this.updateInverterDiagnostics(inverterData);
 					this.updateFaultState('inverter', {
@@ -214,6 +221,9 @@ class SolPlanet extends Inverter {
 						this.setValueWithCatch("meter_power", totalProductionEnergy);
 					}
 
+					// The battery keeps working while the inverter is not producing
+					await this.updateBatteryData(primaryInverter);
+
 					if( deviceState !== 1 ) {
 						if( deviceState === 0 ) {
 							const result = this.setValueWithCatch('measure_power', 0 );
@@ -255,61 +265,6 @@ class SolPlanet extends Inverter {
 						this.updateProducingState('solar', currentProductionPower, 'sol_solar_production_started', 'sol_solar_production_stopped');
 					}
 
-					// Check if there is a battery
-					if( primaryInverter.hasBatteryStorage() ) {
-
-						// Get the battery info
-						const batteryData = await this.api.getBatteryData();
-
-						if( batteryData !== null ) {
-
-							// Battery %
-							const batterySoc = this.parseApiNumber(batteryData.soc, {
-								invalidValues: [0xFFFF],
-							});
-							this.homey.log( `Battery percentage is: ${ batterySoc }%` );
-
-							if( batterySoc !== null && batterySoc >= 0 && batterySoc <= 100 ) {
-								const result = this.setValueWithCatch("battery_soc", batterySoc);
-
-								if( this.hasCapability('measure_battery') ) {
-									this.setValueWithCatch('measure_battery', batterySoc);
-								}
-
-								this.emitNumericFlowCards(result, {
-									changedCard: 'sol_battery_percentage_changed',
-									risesAboveCard: 'sol_battery_rises_above',
-									dropsBelowCard: 'sol_battery_drops_below',
-									tokenName: 'battery_percentage',
-								});
-							}
-
-							// The API reports negative=charging; invert to positive=charging
-							const apiBatteryPower = this.parseApiNumber(batteryData.pb, {
-								invalidValues: [-2147483648, 0xFFFFFFFF],
-							});
-							this.batteryPower = apiBatteryPower === null ? null : 0 - apiBatteryPower; // 0 - x avoids -0
-							this.batteryStateOfHealth = this.parseApiNumber(batteryData.soh, {
-								invalidValues: [0xFFFF],
-							});
-							this.updateDirectionalPowerState('battery', this.batteryPower, {
-								positive: 'sol_battery_started_charging',
-								negative: 'sol_battery_started_discharging',
-								idle: 'sol_battery_became_idle',
-							});
-							this.updateActiveLowFaultState('battery', {
-								error1: batteryData.eb1,
-								error2: batteryData.eb2,
-								error3: batteryData.eb3,
-								error4: batteryData.eb4,
-								warning1: batteryData.wb1,
-								warning2: batteryData.wb2,
-								warning3: batteryData.wb3,
-								warning4: batteryData.wb4,
-							}, 'sol_inverter_fault', 'battery');
-						}
-					}
-
 					this.setAvailable().catch( this.onError.bind( this ) );
 				} else {
 
@@ -345,6 +300,69 @@ class SolPlanet extends Inverter {
 		}
 	}
 
+	async updateBatteryData( primaryInverter ) {
+		if( !primaryInverter.hasBatteryStorage() ) {
+			return;
+		}
+
+		// A battery request failure must not block the solar updates
+		let batteryData = null;
+		try {
+			batteryData = await this.api.getBatteryData();
+		} catch (err) {
+			this.homey.log(`Could not fetch battery data: ${ err.message }`);
+			return;
+		}
+
+		if( batteryData !== null ) {
+
+			// Battery %
+			const batterySoc = this.parseApiNumber(batteryData.soc, {
+				invalidValues: [0xFFFF],
+			});
+			this.homey.log( `Battery percentage is: ${ batterySoc }%` );
+
+			if( batterySoc !== null && batterySoc >= 0 && batterySoc <= 100 ) {
+				const result = this.setValueWithCatch("battery_soc", batterySoc);
+
+				if( this.hasCapability('measure_battery') ) {
+					this.setValueWithCatch('measure_battery', batterySoc);
+				}
+
+				this.emitNumericFlowCards(result, {
+					changedCard: 'sol_battery_percentage_changed',
+					risesAboveCard: 'sol_battery_rises_above',
+					dropsBelowCard: 'sol_battery_drops_below',
+					tokenName: 'battery_percentage',
+				});
+			}
+
+			// The API reports negative=charging; invert to positive=charging
+			const apiBatteryPower = this.parseApiNumber(batteryData.pb, {
+				invalidValues: [-2147483648, 0xFFFFFFFF],
+			});
+			this.batteryPower = apiBatteryPower === null ? null : 0 - apiBatteryPower; // 0 - x avoids -0
+			this.batteryStateOfHealth = this.parseApiNumber(batteryData.soh, {
+				invalidValues: [0xFFFF],
+			});
+			this.updateDirectionalPowerState('battery', this.batteryPower, {
+				positive: 'sol_battery_started_charging',
+				negative: 'sol_battery_started_discharging',
+				idle: 'sol_battery_became_idle',
+			});
+			this.updateActiveLowFaultState('battery', {
+				error1: batteryData.eb1,
+				error2: batteryData.eb2,
+				error3: batteryData.eb3,
+				error4: batteryData.eb4,
+				warning1: batteryData.wb1,
+				warning2: batteryData.wb2,
+				warning3: batteryData.wb3,
+				warning4: batteryData.wb4,
+			}, 'sol_inverter_fault', 'battery');
+		}
+	}
+
 	async setIsOffline() {
 		if( this.fetchFailed > 3 || this.checksFailed > 3 ) {
 			this.updateConnectionState(false, 'sol_device_online', 'sol_device_offline');
@@ -358,14 +376,6 @@ class SolPlanet extends Inverter {
 
 	onError (error) {
 		const errorMessage = error.message;
-
-		// If the error message contains the words 'not found' we have to stop the interval
-		// This means the device is not there anymore and we should not do anything...
-		if( errorMessage.toLowerCase().includes('not found') ) {
-			this.homey.log('Device could not be found. Stop the interval');
-			this.stopInterval()
-			return
-		}
 
 		// Update the fail checks
 		this.checksFailed++;

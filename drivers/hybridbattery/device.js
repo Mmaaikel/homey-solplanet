@@ -308,12 +308,6 @@ class HybridBattery extends Inverter {
 	onError (error) {
 		const errorMessage = error.message;
 
-		if( errorMessage.toLowerCase().includes('not found') ) {
-			this.homey.log('Device could not be found. Stop the interval');
-			this.stopInterval()
-			return
-		}
-
 		this.checksFailed++;
 		this.homey.log(`Unavailable (${this.checksFailed}): ${errorMessage}`);
 	}
